@@ -6,7 +6,9 @@ import numpy as np
 from std_msgs.msg import String
 
 
-eeg=OpenBCICyton()
+
+port='/dev/ttyUSB0'
+eeg=OpenBCICyton(port)
 class datastreaming():
     def __init__(self):
 
