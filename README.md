@@ -15,9 +15,6 @@ Openbci_python
 3. Cursor control 
     Read topic from output of machine learning model and control the cursor movement
 
-## Project Schedule
-    ![Schedule.jpg](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/Schedule.jpg)
-
 
 ## Project block diagram
 ![Winter project scratch-6.jpg](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/Winter%20project%20scratch-6.jpg)
