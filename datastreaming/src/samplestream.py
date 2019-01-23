@@ -8,7 +8,8 @@ from std_msgs.msg import String
 
 
 port='/dev/ttyUSB0'
-eeg=OpenBCICyton(port)
+eeg=OpenBCICyton()
+
 class datastreaming():
     def __init__(self):
 
@@ -28,7 +29,8 @@ def main():
     rospy.init_node('data_streaming',anonymous=True)
     try:
         stream=datastreaming()
-        eeg.start_streaming(stream.filter)
+        while not rospy.is_shutdown():
+            eeg.start_streaming(stream.filter)
        
     except rospy.ROSInterruptException: pass    
 
