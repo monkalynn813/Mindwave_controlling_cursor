@@ -29,6 +29,7 @@ def main():
     try:
         stream=datastreaming()
         eeg.start_streaming(stream.filter)
+       
     except rospy.ROSInterruptException: pass    
 
 if __name__ == '__main__':
