@@ -4,9 +4,10 @@ import rospy
 from std_msgs.msg import String
 import numpy as np
 
-class motor_imagine():
+class motor_imagine:
 
     def __init__(self):
+        
         
         self.sample_data_sub=rospy.Subscriber('/mindcontrol/channel_data',String,self.ml_model)
 
@@ -25,8 +26,11 @@ class motor_imagine():
             #move down
             os.system("xdotool mousemove_relative 0 1")
         else:
-            pass            
+            pass  
 
+        self.rate=rospy.Rate(50)  
+        self.rate.sleep()        
+        
     def ml_model(self,data):
         #self.cursor_command=argmax()...
         self.cursor_command=1
@@ -36,10 +40,13 @@ class motor_imagine():
 def main():
     rospy.init_node('motor_imagine',anonymous=True)
 
-    while not rospy.is_shutdown():
-        try:
+    
+    try:
+        while not rospy.is_shutdown():
             motor=motor_imagine()
-        except rospy.ROSInterruptException: pass
+            
+        
+    except rospy.ROSInterruptException:pass
         
 
     
