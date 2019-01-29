@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+
 import numpy as np
 import pandas as pd
 import utils
 import time
+
 
 class Brain_waves:
     def __init__(self, eeg, channels,fs, frame=200):
@@ -22,13 +24,17 @@ class Brain_waves:
             if len(self.data) != 0 and len(self.data) %self.frame == 0:
                 self.data = self.data[-self.buff:]
                 for i in range(len(self.callbacks)):
+                    
                     data = np.array(self.data).transpose()
                     band = self.bands[i]
                     freq = [ i[-1] for i in self.analyze(data, band)]
-                    self.callbacks[i](freq)
+                    
+                    
+                    self.callbacks[0](freq)
 
             channel_data = sample.channel_data
             self.data.append(channel_data)
+            
             if self.save_path != None:
                 row = ''
                 row += str(time.time())
@@ -67,6 +73,7 @@ class Brain_waves:
         self.callbacks = func
         self.bands = band
         self.eeg.start_streaming(self.callback_main, time_limit)
+        print(len(self.data))
 
 
     def read_csv_waves(self, file_name, band):
