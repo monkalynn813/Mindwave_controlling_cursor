@@ -9,13 +9,11 @@ from scipy import signal
 
 
 
-# port='/dev/ttyUSB0'
-# eeg=OpenBCICyton()
-
 
 class datastreaming:
     def __init__(self):
-
+        
+        # self.port='/dev/ttyUSB0'
         self.eeg=OpenBCICyton() #Openbci_python class for cyton board
         rospy.sleep(1.0)
 
@@ -27,30 +25,39 @@ class datastreaming:
         self.channelnum=8 #using 8 channel Cyton biosensing board
        
         
-        self.band=(8,13) #desired bandpass boundary
-        
+        self.band=(7,13) #desired bandpass boundary
+        self.notch_val=60 #notch 60 for NA area
 
         self.br=waves.Brain_waves(self.eeg,8,self.fs)
         self.data_publisher=rospy.Publisher('/mindcontrol/channel_data',String,queue_size=20)
 
     def filter(self,sample):
+
         if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
             self.raw_data=self.raw_data[-self.buff:]
-            channel_extract=np.array(self.raw_data)
-            for k in range(self.channelnum)
-
-            # filtered_sample= ######
-                        
-            # self.filtered_data.append(filtered_sample)
             
+            ##Store buff number of data in the matrix for DSP
+            channel_extract=np.array(self.raw_data)
+            for k in range(self.channelnum):
+                channel_data=channel_extract[:,k]
+                
+                channel_bp=self.bandpass(self.band[0],self.band[1],channel_data,self.fs) #only pass the bandpass filter
+                channel_filtered=self.notch(self.notch_val,channel_bp,self.fs)#pass bandpass filtered data through notch filter
+                #put filtered data in (datanum * channelnum) matrix
+                channel_filtered=channel_filtered.reshape(len(channel_filtered),1) 
+
+                if k==0:
+                    self.filtered_data=channel_filtered
+                else:
+                    self.filtered_data=np.append(self.filtered_data,channel_filtered,axis=1) #alwasy store the latest filtered data (past 2500 gourps of data)
+            
+            filtered_sample = self.filtered_data[-1]
+            filtered_sample=str(filtered_sample)
+            self.data_publisher.publish(filtered_sample)
+            
+        
         self.raw_data.append(sample.channel_data)
 
-        # print(sample.channel_data)
-        # filtered_sample=str(filtered_sample)
-        # self.data_publisher.publish(filtered_sample)
-
-        #channel_data=sample.channel_data
-        #publish topic here
     def bandpass(self,start,stop,data,fs):
         bp_Hz = np.array([start, stop])
         b, a = signal.butter(5, bp_Hz / (fs / 2.0), btype='bandpass')
@@ -61,13 +68,20 @@ class datastreaming:
         b, a = signal.butter(3, bp_stop_Hz / (fs / 2.0), 'bandstop')
         fin = signal.lfilter(b, a, data)
         return fin
+    
+    def fft(self,data, fs):
+        L = len(data)
+        freq = np.linspace(0.0, 1.0 / (2.0 * fs **-1), int(L / 2))
+        yi = np.fft.fft(data)#[1:]
+        y = yi[range(int(L / 2))]
+        return freq, abs(y)
+
 
     def stream(self):
         self.eeg.start_streaming(self.filter,5)
-        print(len(self.raw_data))
-        testform=np.array(self.raw_data)
-        print(testform[:,1].shape)
         
+        print(np.array(self.raw_data).shape)
+        print(self.filtered_data.shape)
         
         
         # self.br.start_streaming(self.filter,self.band,25,file_name='data/test.csv')
