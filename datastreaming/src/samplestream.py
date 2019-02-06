@@ -6,6 +6,7 @@ import numpy as np
 from std_msgs.msg import String
 from scipy import signal
 from matplotlib import pyplot as plt
+from datastreaming.msg import ChannelData
 
 
 
@@ -30,58 +31,73 @@ class datastreaming:
 
         
         self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',String,queue_size=20)
-        self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',String,queue_size=20)
+        self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
         self.analysis_time=0
-        
+        self.average_amp_sample=ChannelData()
+
+        # self.fig=plt.figure()
+        # self.ax=self.fig.add_subplot(1,1,1)
     def filter(self,sample):
+        
+        if not rospy.is_shutdown():
+                
+            if len(self.raw_data)>=self.frame:
+                if self.analysis_time==0: print('=======frame initialized, start to analysis========')
+            # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
+                self.raw_data=self.raw_data[-self.frame:]
+                
+                _average_amp=[]
+                ##Store buff number of data in the matrix for DSP
+                channel_extract=np.array(self.raw_data)
+                for k in range(self.channelnum):
+                    
+                    channel_data=channel_extract[:,k]
+                    
+                    # channel_bp=self.bandpass(self.band[0],self.band[1],channel_data,self.fs) #only pass the bandpass filter
+                    # channel_filtered=self.notch(self.notch_val,channel_bp,self.fs)#pass bandpass filtered data through notch filter
+                    
+                    ##FFT for particular channel##
+                    self.freq,self.y=self.fft(channel_data,self.fs)
+                    
+                    ## insert figure here?
+                    ##Reduce dimension of FFT data
+                    freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
+                    self.desired_freq=self.freq[freq_ind]
+                    self.amp_of_desired_freq=self.y[freq_ind]
+                    
+                    average_amp_desired=np.mean(self.amp_of_desired_freq)
+                    setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
+                    
+                    # fft_amp=np.append(fft_amp,self.amp_of_desired_freq,axis=0)
 
-        if len(self.raw_data)>=self.frame:
-            if self.analysis_time==0: print('=======frame initialized, start to analysis========')
-        # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
-            self.raw_data=self.raw_data[-self.frame:]
-            _average_amp=[]
-            ##Store buff number of data in the matrix for DSP
-            channel_extract=np.array(self.raw_data)
-            for k in range(self.channelnum):
-                
-                channel_data=channel_extract[:,k]
-                
-                # channel_bp=self.bandpass(self.band[0],self.band[1],channel_data,self.fs) #only pass the bandpass filter
-                # channel_filtered=self.notch(self.notch_val,channel_bp,self.fs)#pass bandpass filtered data through notch filter
-                
-                ##FFT for particular channel##
-                self.freq,self.y=self.fft(channel_data,self.fs)
-                
-                # insert figure here?
-                ##Reduce dimension of FFT data
-                freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
-                self.desired_freq=self.freq[freq_ind]
-                self.amp_of_desired_freq=self.y[freq_ind]
-                
-                average_amp_desired=np.mean(self.amp_of_desired_freq)
-                
-                _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
+                    
+                    _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
+                    
+
+                    ##put filtered data in (datanum * channelnum) matrix
+                    # channel_filtered=channel_filtered.reshape(len(channel_filtered),1) 
+                    # if k==0:
+                    #     self.filtered_data=channel_filtered
+                    # else:
+                    #     self.filtered_data=np.append(self.filtered_data,channel_filtered,axis=1) #alwasy store the latest filtered data (past 2500 gourps of data)
                 
 
-                #put filtered data in (datanum * channelnum) matrix
-                # channel_filtered=channel_filtered.reshape(len(channel_filtered),1) 
-                # if k==0:
-                #     self.filtered_data=channel_filtered
-                # else:
-                #     self.filtered_data=np.append(self.filtered_data,channel_filtered,axis=1) #alwasy store the latest filtered data (past 2500 gourps of data)
+                self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
+
+                # filtered_sample = self.filtered_data[-1]
+                # filtered_sample=str(filtered_sample)
+                # self.fig.clear()
+                # plt.plot(self.desired_freq,self.amp_of_desired_freq)
+                # plt.show()
+                
+
+                # self.data_publisher_tdomain.publish(filtered_sample)
+                self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
+                self.analysis_time=self.analysis_time+1
             
-            self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
 
-            # filtered_sample = self.filtered_data[-1]
-            # filtered_sample=str(filtered_sample)
-            average_amp_sample=str(_average_amp)
-            # self.data_publisher_tdomain.publish(filtered_sample)
-            self.data_publisher_fdomain.publish(average_amp_sample)
-            self.analysis_time=self.analysis_time+1
-        
+            self.raw_data.append(sample.channel_data)
 
-        self.raw_data.append(sample.channel_data)
-        
 
     def bandpass(self,start,stop,data,fs):
         bp_Hz = np.array([start, stop])
@@ -102,10 +118,12 @@ class datastreaming:
 
 
     def stream(self):
-        self.eeg.start_streaming(self.filter,10)
-        print(self.average_amp.shape)
-        print(np.array(self.raw_data).shape)
-        print(self.analysis_time)
+
+        self.eeg.start_streaming(self.filter)
+        # plt.plot(self.desired_freq,self.amp_of_desired_freq)
+        # plt.show()
+                
+        print 'Has analyzed data ',self.analysis_time,'times'
         
 
         
