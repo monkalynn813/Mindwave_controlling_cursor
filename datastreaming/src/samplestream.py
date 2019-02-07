@@ -9,8 +9,6 @@ from matplotlib import pyplot as plt
 from datastreaming.msg import ChannelData
 
 
-
-
 class datastreaming:
     def __init__(self):
         
@@ -26,18 +24,19 @@ class datastreaming:
         self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
         self.buff=2500  #number of data store in raw_data matrix
         
-        self.band=(7,13) #desired bandpass boundary
+        self.band=(5,50) #desired bandpass boundary
         self.notch_val=60 #notch 60 for NA area
 
         
-        self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',String,queue_size=20)
+        self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',ChannelData,queue_size=20)
         self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
+        self.realtime_bpdata=ChannelData()
 
         # self.fig=plt.figure()
         # self.ax=self.fig.add_subplot(1,1,1)
-    def filter(self,sample):
+    def filter_fft(self,sample):
         
         if not rospy.is_shutdown():
                 
@@ -98,6 +97,38 @@ class datastreaming:
 
             self.raw_data.append(sample.channel_data)
 
+    def filter_bp(self,sample):
+                
+        if not rospy.is_shutdown():
+                
+            if len(self.raw_data)>=self.frame and len(self.raw_data) %8==0:
+                if self.analysis_time==0: print('=======frame initialized, start to analysis========')
+            # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
+                self.raw_data=self.raw_data[-self.frame:]
+                ##Store buff number of data in the matrix for DSP
+                channel_extract=np.array(self.raw_data)
+                for k in range(self.channelnum):
+                    
+                    channel_data=channel_extract[:,k]
+                    
+                    channel_filtered=self.bandpass(self.band[0],self.band[1],channel_data,self.fs) #only pass the bandpass filter
+                    # channel_filtered=self.notch(self.notch_val,channel_bp,self.fs)#pass bandpass filtered data through notch filter
+                    
+                    #put filtered data in (datanum * channelnum) matrix
+                    # channel_filtered=channel_filtered.reshape(len(channel_filtered),1) 
+                    setattr(self.realtime_bpdata,"channel"+str(k+1),channel_filtered[-1])
+
+                #     if k==0:
+                #         self.filtered_data=channel_filtered
+                #     else:
+                #         self.filtered_data=np.append(self.filtered_data,channel_filtered,axis=1) #alwasy store the latest filtered data (past 2500 gourps of data)
+                                
+                # filtered_sample = self.filtered_data[-1] 
+                
+                self.data_publisher_tdomain.publish(self.realtime_bpdata)
+                self.analysis_time=self.analysis_time+1
+            self.raw_data.append(sample.channel_data)
+
 
     def bandpass(self,start,stop,data,fs):
         bp_Hz = np.array([start, stop])
@@ -119,7 +150,7 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter)
+        self.eeg.start_streaming(self.filter_bp)
         # plt.plot(self.desired_freq,self.amp_of_desired_freq)
         # plt.show()
                 
