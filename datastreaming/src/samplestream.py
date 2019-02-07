@@ -6,7 +6,7 @@ import numpy as np
 from std_msgs.msg import String
 from scipy import signal
 from matplotlib import pyplot as plt
-from datastreaming.msg import ChannelData
+from datastreaming.msg import ChannelData, Plotarray
 
 
 class datastreaming:
@@ -18,7 +18,7 @@ class datastreaming:
 
         self.fs=250 #record frequency for Cyton board
         self.frame=1250 #once the data matrix is N times this number, process DSP
-        self.channelnum=8 #using 8 channel Cyton biosensing board
+        self.channelnum=1 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
         self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
@@ -30,9 +30,13 @@ class datastreaming:
         
         self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',ChannelData,queue_size=20)
         self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
+        self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
+        self.freq_publisher=rospy.Publisher('/mindcontrol/freq',Plotarray,queue_size=20)
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
         self.realtime_bpdata=ChannelData()
+        self.ampplot=Plotarray()
+        self.freqplot=Plotarray()
 
         # self.fig=plt.figure()
         # self.ax=self.fig.add_subplot(1,1,1)
@@ -40,7 +44,7 @@ class datastreaming:
         
         if not rospy.is_shutdown():
                 
-            if len(self.raw_data)>=self.frame:
+            if len(self.raw_data)>=self.frame and len(self.raw_data) %8==0:
                 if self.analysis_time==0: print('=======frame initialized, start to analysis========')
             # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
                 self.raw_data=self.raw_data[-self.frame:]
@@ -52,9 +56,7 @@ class datastreaming:
                     
                     channel_data=channel_extract[:,k]
                     
-                    # channel_bp=self.bandpass(self.band[0],self.band[1],channel_data,self.fs) #only pass the bandpass filter
-                    # channel_filtered=self.notch(self.notch_val,channel_bp,self.fs)#pass bandpass filtered data through notch filter
-                    
+                   
                     ##FFT for particular channel##
                     self.freq,self.y=self.fft(channel_data,self.fs)
                     
@@ -73,24 +75,13 @@ class datastreaming:
                     _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
                     
 
-                    ##put filtered data in (datanum * channelnum) matrix
-                    # channel_filtered=channel_filtered.reshape(len(channel_filtered),1) 
-                    # if k==0:
-                    #     self.filtered_data=channel_filtered
-                    # else:
-                    #     self.filtered_data=np.append(self.filtered_data,channel_filtered,axis=1) #alwasy store the latest filtered data (past 2500 gourps of data)
-                
-
                 self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
 
-                # filtered_sample = self.filtered_data[-1]
-                # filtered_sample=str(filtered_sample)
-                # self.fig.clear()
-                # plt.plot(self.desired_freq,self.amp_of_desired_freq)
-                # plt.show()
+                self.ampplot.data=np.ndarray.tolist(self.amp_of_desired_freq)
+                self.freqplot.data=np.ndarray.tolist(self.desired_freq)
                 
-
-                # self.data_publisher_tdomain.publish(filtered_sample)
+                self.fft_publisher.publish(self.ampplot)
+                self.freq_publisher.publish(self.freqplot)
                 self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
                 self.analysis_time=self.analysis_time+1
             
@@ -150,7 +141,7 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter_bp)
+        self.eeg.start_streaming(self.filter_fft,10)
         # plt.plot(self.desired_freq,self.amp_of_desired_freq)
         # plt.show()
                 
