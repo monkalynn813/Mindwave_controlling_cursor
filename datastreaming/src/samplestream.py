@@ -18,7 +18,7 @@ class datastreaming:
 
         self.fs=250 #record frequency for Cyton board
         self.frame=1250 #once the data matrix is N times this number, process DSP
-        self.channelnum=1 #using 8 channel Cyton biosensing board
+        self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
         self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
@@ -68,18 +68,16 @@ class datastreaming:
                     
                     average_amp_desired=np.mean(self.amp_of_desired_freq)
                     setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
+                    setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq))
                     
-                    # fft_amp=np.append(fft_amp,self.amp_of_desired_freq,axis=0)
-
-                    
+                                       
                     _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
                     
 
                 self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
 
-                self.ampplot.data=np.ndarray.tolist(self.amp_of_desired_freq)
-                self.freqplot.data=np.ndarray.tolist(self.desired_freq)
-                
+                self.freqplot.channel1=np.ndarray.tolist(self.desired_freq)
+
                 self.fft_publisher.publish(self.ampplot)
                 self.freq_publisher.publish(self.freqplot)
                 self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
@@ -141,7 +139,7 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter_fft,10)
+        self.eeg.start_streaming(self.filter_fft,60)
         # plt.plot(self.desired_freq,self.amp_of_desired_freq)
         # plt.show()
                 
