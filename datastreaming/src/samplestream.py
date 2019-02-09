@@ -24,7 +24,7 @@ class datastreaming:
         self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
         self.buff=2500  #number of data store in raw_data matrix
         
-        self.band=(5,50) #desired bandpass boundary
+        self.band=(5,30) #desired bandpass boundary
         self.notch_val=60 #notch 60 for NA area
 
         
@@ -139,7 +139,7 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter_fft,60)
+        self.eeg.start_streaming(self.filter_bp)
         # plt.plot(self.desired_freq,self.amp_of_desired_freq)
         # plt.show()
                 
