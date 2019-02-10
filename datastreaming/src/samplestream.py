@@ -3,7 +3,6 @@
 from openbci.cyton import OpenBCICyton
 import rospy
 import numpy as np
-from std_msgs.msg import String
 from scipy import signal
 from matplotlib import pyplot as plt
 from datastreaming.msg import ChannelData, Plotarray

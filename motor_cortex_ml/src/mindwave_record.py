@@ -2,14 +2,13 @@
 
 import rospy
 import numpy as np
-from std_msgs.msg import String
 from datastreaming.msg import ChannelData, Plotarray
 from matplotlib import pyplot as plt
 import time
 import random
 
 
-class classifier():
+class recorder():
     def __init__(self):
 
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
@@ -35,7 +34,7 @@ class classifier():
 
         if self.detailcounter%150==0 or self.detailcounter==0: #record 150 samples every time call a direction
             self.centercounter=0
-            
+            self.restcounter=0
             if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
                 call_which=random.randint(0,1) #random pick a direction to imagin 0=left; 1=right
             elif self.leftcounter==self.recordsize and self.rightcounter<self.recordsize: call_which=1
@@ -56,7 +55,6 @@ class classifier():
         elif self.centercounter<=150:
             self.focuscenter()
             self.centercounter+=1
-            
             self.detailcounter=1
         else:        
             self.func()
@@ -64,15 +62,15 @@ class classifier():
         
         
     def focuscenter(self):
-        rospy.loginfo("focus on center")
+        print("focus on center")
         label='0'
         self.writeinfile(label)
     def focusleft(self):
-        rospy.loginfo("imagine moving left hand")
+        print("imagine moving left hand")
         label='-1'
         self.writeinfile(label)
     def focusright(self):
-        rospy.loginfo("imagine moving right hand")
+        print("imagine moving right hand")
         label='1'         
         self.writeinfile(label)
     def rest(self):
@@ -102,11 +100,11 @@ class classifier():
             f.write(row)
 
 def main():
-    rospy.init_node("mindwave_classifier",anonymous=True)
+    rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
     
     try:
        
-        ml=classifier()
+        recored=recorder()
 
         
     except rospy.ROSInterruptException: pass
