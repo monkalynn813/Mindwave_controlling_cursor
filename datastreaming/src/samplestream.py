@@ -35,6 +35,7 @@ class datastreaming:
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
         self.realtime_bpdata=ChannelData()
+        self.realtime_rawdata=ChannelData()
         self.ampplot=Plotarray()
         self.freqplot=Plotarray()
 
@@ -73,7 +74,8 @@ class datastreaming:
             self.analysis_time=self.analysis_time+1
 
         self.raw_data.append(sample.channel_data)
-
+        if rospy.is_shutdown():
+            self.eeg.stop()
     def filter_bp(self,sample):
                  
         if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
@@ -105,7 +107,16 @@ class datastreaming:
             self.data_publisher_tdomain.publish(self.realtime_bpdata)
             self.analysis_time=self.analysis_time+1
         self.raw_data.append(sample.channel_data)
-
+        if rospy.is_shutdown():
+            self.eeg.stop()
+    def non_filter(self,sample):
+        print(sample.channel_data)
+        data=sample.channel_data
+        for k in range(self.channelnum):
+            setattr(self.realtime_rawdata,"channel"+str(k+1),data[k])
+        self.data_publisher_tdomain.publish(self.realtime_rawdata) 
+        if rospy.is_shutdown():
+            self.eeg.stop()     
 
     def bandpass(self,start,stop,data,fs):
         bp_Hz = np.array([start, stop])
@@ -128,8 +139,8 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter_bp,20)
-
+        self.eeg.start_streaming(self.non_filter)
+        
                 
         print 'Has analyzed data ',self.analysis_time,'times'
         

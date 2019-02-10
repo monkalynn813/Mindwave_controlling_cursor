@@ -14,7 +14,8 @@ class recorder():
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
         self.savepath="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/record.csv"
         self.delim = ','
-        self.recordsize=20
+        self.recordsize=3
+        self.detailsize=1250
         self.detailcounter=0
         self.leftcounter=0
         self.rightcounter=0
@@ -32,7 +33,7 @@ class recorder():
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
 
-        if self.detailcounter%150==0 or self.detailcounter==0: #record 150 samples every time call a direction
+        if self.detailcounter%self.detailsize==0 or self.detailcounter==0: #record 150 samples every time call a direction
             self.centercounter=0
             self.restcounter=0
             if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
@@ -52,7 +53,7 @@ class recorder():
             self.rest()
             self.restcounter+=1
             self.detailcounter=1
-        elif self.centercounter<=150:
+        elif self.centercounter<=self.detailsize:
             self.focuscenter()
             self.centercounter+=1
             self.detailcounter=1
@@ -101,6 +102,9 @@ class recorder():
 
 def main():
     rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
+    rospy.loginfo("===Try to stay rest====")
+    rospy.loginfo("===Please wait for 20s====")
+    rospy.sleep(20.0)
     
     try:
        
