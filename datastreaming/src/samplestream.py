@@ -7,6 +7,7 @@ from std_msgs.msg import String
 from scipy import signal
 from matplotlib import pyplot as plt
 from datastreaming.msg import ChannelData, Plotarray
+from math import log1p
 
 
 class datastreaming:
@@ -24,7 +25,7 @@ class datastreaming:
         self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
         self.buff=2500  #number of data store in raw_data matrix
         
-        self.band=(5,30) #desired bandpass boundary
+        self.band=(16,24) #desired bandpass boundary
         self.notch_val=60 #notch 60 for NA area
 
         
@@ -38,8 +39,6 @@ class datastreaming:
         self.ampplot=Plotarray()
         self.freqplot=Plotarray()
 
-        # self.fig=plt.figure()
-        # self.ax=self.fig.add_subplot(1,1,1)
     def filter_fft(self,sample):
         
         if not rospy.is_shutdown():
@@ -55,34 +54,26 @@ class datastreaming:
                 for k in range(self.channelnum):
                     
                     channel_data=channel_extract[:,k]
-                    
-                   
-                    ##FFT for particular channel##
-                    self.freq,self.y=self.fft(channel_data,self.fs)
-                    
-                    ## insert figure here?
-                    ##Reduce dimension of FFT data
+                    channel_filtered=self.bandpass(self.band[0],self.band[1],channel_data,self.fs)
+                    self.freq,self.y=self.fft(channel_filtered,self.fs)##FFT for particular channel##
+                   #average and log1p amp of desired frequency
                     freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
                     self.desired_freq=self.freq[freq_ind]
                     self.amp_of_desired_freq=self.y[freq_ind]
                     
                     average_amp_desired=np.mean(self.amp_of_desired_freq)
+                    # print(average_amp_desired)
                     setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
-                    setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq))
-                    
-                                       
-                    _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
-                    
+                    setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
+                   # _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
+                # self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
 
-                self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
+                self.freqplot.channel1=np.ndarray.tolist(self.desired_freq) #plot
 
-                self.freqplot.channel1=np.ndarray.tolist(self.desired_freq)
-
-                self.fft_publisher.publish(self.ampplot)
-                self.freq_publisher.publish(self.freqplot)
+                self.fft_publisher.publish(self.ampplot) #plot
+                self.freq_publisher.publish(self.freqplot) #plot
                 self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
                 self.analysis_time=self.analysis_time+1
-            
 
             self.raw_data.append(sample.channel_data)
 
@@ -134,14 +125,14 @@ class datastreaming:
         freq = np.linspace(0.0, 1.0 / (2.0 * fs **-1), int(L / 2))
         yi = np.fft.fft(data)#[1:]
         y = yi[range(int(L / 2))]
+        # ysample= (2.0*abs(yi/L))[range(int(L/2))]
         return freq, abs(y)
 
 
     def stream(self):
 
-        self.eeg.start_streaming(self.filter_bp)
-        # plt.plot(self.desired_freq,self.amp_of_desired_freq)
-        # plt.show()
+        self.eeg.start_streaming(self.filter_fft)
+
                 
         print 'Has analyzed data ',self.analysis_time,'times'
         
