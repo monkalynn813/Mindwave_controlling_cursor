@@ -17,4 +17,4 @@ Openbci_python
 
 
 ## Project block diagram
-![Winter project scratch-6.jpg](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/Winter%20project%20scratch-6.jpg)
+![script_structure.JPG](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/script_structure.JPG)
