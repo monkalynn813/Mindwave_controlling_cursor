@@ -8,12 +8,13 @@ import time
 import random
 import sys
 import pylab as pl
-
+import datetime
 
 class recorder():
     def __init__(self):
 
-        self.savepath="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/record.csv"
+        self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
+        self.savepath=self.savedir+'recored'+str(datetime.datetime.now())+'.csv'
         self.delim = ','
         self.recordsize=4
         self.detailsize=1250
@@ -119,7 +120,7 @@ class recorder():
         row += self.delim
         row += str(label)
         row += '\n'
-        with open(self.savepath,'a') as f:
+        with open(self.savepath,'w') as f:
             f.write(row)
 
 def main():
