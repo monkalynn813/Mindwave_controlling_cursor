@@ -58,7 +58,7 @@ class datastreaming:
                 freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
                 self.desired_freq=self.freq[freq_ind]
                 self.amp_of_desired_freq=self.y[freq_ind]
-                
+                    
                 average_amp_desired=np.mean(self.amp_of_desired_freq)
                 # print(average_amp_desired)
                 setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
@@ -139,12 +139,10 @@ class datastreaming:
 
     def stream(self):
 
-        self.eeg.start_streaming(self.non_filter)
+        self.eeg.start_streaming(self.filter_fft)
         
                 
         print 'Has analyzed data ',self.analysis_time,'times'
-        
-
         
 
 def main():

@@ -3,16 +3,22 @@ import os
 import rospy
 from std_msgs.msg import String
 import numpy as np
-from std_msgs.msgi import Int32
+from std_msgs.msg import Int32
 
 class motor_imagine:
 
     def __init__(self):
         
         
-        self.sample_data_sub=rospy.Subscriber('/mindcontrol/mouce_command',Int32,self.command_sign)
-
-        self.cursor_command=1
+        self.sample_data_sub=rospy.Subscriber('/mindcontrol/mouse_command',Int32,self.command_sign)
+        
+    def command_sign(self,data):
+        self.cursor_command=data.data
+        print(self.cursor_command)
+        self.move_mouse()
+        
+    def move_mouse(self):
+        # self.cursor_command=1
 
         if self.cursor_command == -1:
             #move left
@@ -30,12 +36,7 @@ class motor_imagine:
             pass  
 
         self.rate=rospy.Rate(50)  
-        self.rate.sleep()        
-        
-    def command_sign(self,data):
-        self.cursor_command=data.data
-        
-
+        self.rate.sleep()   
 
 def main():
     rospy.init_node('motor_imagine',anonymous=True)

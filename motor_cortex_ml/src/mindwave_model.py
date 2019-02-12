@@ -2,12 +2,12 @@
 
 import rospy
 import numpy as np
-from scipy import signal
-from std_msgs.msgi import Int32
+# from scipy import signal
+from std_msgs.msg import Int32
 from datastreaming.msg import ChannelData, Plotarray
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import LinearSVC
-from sklearn.svm import SVC
+# from sklearn.multiclass import OneVsRestClassifier
+# from sklearn.svm import LinearSVC
+# from sklearn.svm import SVC
 import csv
 import pickle
 
@@ -32,7 +32,7 @@ class classifier():
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
 
-        self.inputdata=np.array([[self.fftamp1,self.fftamp2,self.fftamp3,self.fftamp4,self.fftamp5,self.fftamp6,self.fftamp6,self.fftamp7,self.fftamp8]])
+        self.inputdata=np.array([[self.fftamp1,self.fftamp2,self.fftamp3,self.fftamp4,self.fftamp5,self.fftamp6,self.fftamp7,self.fftamp8]])
         self.model_command()
     def model_command(self):
 
