@@ -6,22 +6,31 @@ from datastreaming.msg import ChannelData, Plotarray
 from matplotlib import pyplot as plt
 import time
 import random
+import sys
+import pylab as pl
 
 
 class recorder():
     def __init__(self):
 
-        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
         self.savepath="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/record.csv"
         self.delim = ','
-        self.recordsize=3
+        self.recordsize=4
         self.detailsize=1250
         self.detailcounter=0
         self.leftcounter=0
         self.rightcounter=0
         self.centercounter=0
         self.restcounter=0
-
+        # self.leftimage=pl.imread('IMG_1044.JPG')
+        # self.rightimage=pl.imread('174982.jpg')
+        # self.centerimage=None
+        # plt.ion()
+        # self.img=pl.imshow(self.leftimage)
+        # pl.pause(1.0)
+        # pl.draw()
+        
+        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1
@@ -33,7 +42,7 @@ class recorder():
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
 
-        if self.detailcounter%self.detailsize==0 or self.detailcounter==0: #record 150 samples every time call a direction
+        if self.detailcounter%self.detailsize==0 or self.detailcounter==0: #record 1250 samples every time call a direction
             self.centercounter=0
             self.restcounter=0
             if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
@@ -49,7 +58,7 @@ class recorder():
                 self.func=self.focusright        
                 self.rightcounter+=1
         
-        if self.restcounter<=150:
+        if self.restcounter<=self.detailsize:
             self.rest()
             self.restcounter+=1
             self.detailcounter=1
@@ -57,25 +66,38 @@ class recorder():
             self.focuscenter()
             self.centercounter+=1
             self.detailcounter=1
-        else:        
+        else:
+            self.detailcounter=0        
             self.func()
             self.detailcounter=self.detailcounter+1
         
         
     def focuscenter(self):
-        print("focus on center")
+        sys.stdout.write('\r Focus on center  ++++++          ')
+        sys.stdout.flush()
+        # self.img.set_data(self.rightimage)
+        # pl.draw()
         label='0'
         self.writeinfile(label)
     def focusleft(self):
-        print("imagine moving left hand")
+        sys.stdout.write("\r imagine moving left hand <<<<<<<    ")
+        sys.stdout.flush()
+        # self.img.set_data(self.leftimage)
+        # pl.draw()
         label='-1'
         self.writeinfile(label)
     def focusright(self):
-        print("imagine moving right hand")
+        sys.stdout.write("\r imagine moving right hand >>>>>>>  ")
+        sys.stdout.flush()
+        # self.img.set_data(self.rightimage)
+        # pl.draw()
         label='1'         
         self.writeinfile(label)
     def rest(self):
-        print("take a break")
+        sys.stdout.write("\r take a break                    ")
+        sys.stdout.flush()
+        # label='9'            #for classifier training's slit purpose
+        # self.writeinfile(label)
 
     def writeinfile(self,label):
         row=''
