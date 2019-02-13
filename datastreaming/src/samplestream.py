@@ -17,7 +17,7 @@ class datastreaming:
         rospy.sleep(1.0)
 
         self.fs=250 #record frequency for Cyton board
-        self.frame=1250 #once the data matrix is N times this number, process DSP
+        self.frame=750 #once the data matrix is N times this number, process DSP
         self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
