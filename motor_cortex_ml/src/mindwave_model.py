@@ -13,8 +13,8 @@ import pickle
 
 class classifier():
     def __init__(self):
-
-        self.model_filename='mindwave_model.pkl'
+        self.modelpath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/src/'
+        self.model_filename=self.modelpath+'mindwave_model.pkl'
         with open(self.model_filename,'rb') as file:
             self.mindwave_model=pickle.load(file)
         self.mouse_publisher=rospy.Publisher('/mindcontrol/mouse_command',Int32,queue_size=10)

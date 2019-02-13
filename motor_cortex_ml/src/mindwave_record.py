@@ -68,34 +68,33 @@ class recorder():
             self.centercounter+=1
             self.detailcounter=1
         else:
-            self.detailcounter=0        
             self.func()
             self.detailcounter=self.detailcounter+1
         
         
     def focuscenter(self):
-        sys.stdout.write('\r Focus on center  ++++++          ')
+        sys.stdout.write('\r Focus on center  ++++++++++++++++++++     ')
         sys.stdout.flush()
         # self.img.set_data(self.rightimage)
         # pl.draw()
         label='0'
         self.writeinfile(label)
     def focusleft(self):
-        sys.stdout.write("\r imagine moving left hand <<<<<<<    ")
+        sys.stdout.write("\r <<<<<<<      imagine moving left hand     ")
         sys.stdout.flush()
         # self.img.set_data(self.leftimage)
         # pl.draw()
         label='-1'
         self.writeinfile(label)
     def focusright(self):
-        sys.stdout.write("\r imagine moving right hand >>>>>>>  ")
+        sys.stdout.write("\r imagine moving right hand        >>>>>>>  ")
         sys.stdout.flush()
         # self.img.set_data(self.rightimage)
         # pl.draw()
         label='1'         
         self.writeinfile(label)
     def rest(self):
-        sys.stdout.write("\r take a break                    ")
+        sys.stdout.write("\r take a break                              ")
         sys.stdout.flush()
         # label='9'            #for classifier training's slit purpose
         # self.writeinfile(label)
@@ -127,7 +126,7 @@ def main():
     rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
     rospy.loginfo("===Try to stay rest====")
     rospy.loginfo("===Please wait for 20s====")
-    rospy.sleep(20.0)
+    rospy.sleep(1.0)
     
     try:
        

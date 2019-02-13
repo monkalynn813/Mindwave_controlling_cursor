@@ -39,6 +39,8 @@ class datastreaming:
         self.ampplot=Plotarray()
         self.freqplot=Plotarray()
 
+        self.mode=rospy.get_param("~mode",'fft')
+
     def filter_fft(self,sample):
           
         if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
@@ -110,7 +112,7 @@ class datastreaming:
         if rospy.is_shutdown():
             self.eeg.stop()
     def non_filter(self,sample):
-        print(sample.channel_data)
+        
         data=sample.channel_data
         for k in range(self.channelnum):
             setattr(self.realtime_rawdata,"channel"+str(k+1),data[k])
@@ -138,10 +140,16 @@ class datastreaming:
 
 
     def stream(self):
+        if self.mode=='fft':
+            rospy.loginfo("=====control mode=====")
+            callback=self.filter_fft
+        elif self.mode=='record':
+            rospy.loginfo("=====record mode======")
+            callback=self.non_filter
+        elif self.mode=='bandpass':
+            callback=self.filter_bp
 
-        self.eeg.start_streaming(self.filter_fft)
-        
-                
+        self.eeg.start_streaming(callback)
         print 'Has analyzed data ',self.analysis_time,'times'
         
 

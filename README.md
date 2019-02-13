@@ -18,3 +18,10 @@ Openbci_python
 
 ## Project block diagram
 ![script_structure.JPG](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/script_structure.JPG)
+
+## Run program by using roslaunch file
+
+ * > roslaunch cursor_control mind_control_cursor.launch mode:=fft
+ * > mode:=record  #to record trainning data
+ * > mode:=fft   #to run control mode after classifier trained
+ * > plot:=True  #to show real-time FFT diagram 

@@ -1,0 +1,25 @@
+<launch>
+
+  
+  <arg name="mode" default='fft' /> 
+  <arg name="plot" default='False'/>
+  
+  <node name="samplestream" pkg="datastreaming" type="samplestream.py" output='screen' >
+    <param name="mode" value="$(arg mode)"/>
+  </node>
+
+
+<node 
+    name="mindwave_model" pkg="motor_cortex_ml" type="mindwave_model.py" 
+        if= "$(eval mode == 'fft')"/>
+<node 
+name="mindwave_record" pkg="motor_cortex_ml" type="mindwave_record.py" output='screen'  
+    if= "$(eval mode == 'record')"/> 
+<node 
+    name="cursorcontrol" pkg="cursor_control" type="cursorcontrol.py" 
+        if= "$(eval mode == 'fft')"/>
+<node 
+    name="realtime_fft" pkg="plotting" type="plotfft.py" 
+        if= "$(eval plot == 'True')"/>
+
+</launch>
