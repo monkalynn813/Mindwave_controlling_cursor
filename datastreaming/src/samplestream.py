@@ -54,8 +54,8 @@ class datastreaming:
             for k in range(self.channelnum):
                 
                 channel_data=channel_extract[:,k]
-                channel_filtered=self.bandpass(self.band[0],self.band[1],channel_data,self.fs)
-                self.freq,self.y=self.fft(channel_filtered,self.fs)##FFT for particular channel##
+                
+                self.freq,self.y=self.fft(channel_data,self.fs)##FFT for particular channel##
                 #average and log1p amp of desired frequency
                 freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
                 self.desired_freq=self.freq[freq_ind]

@@ -2,12 +2,8 @@
 
 import rospy
 import numpy as np
-# from scipy import signal
 from std_msgs.msg import Int32
 from datastreaming.msg import ChannelData, Plotarray
-# from sklearn.multiclass import OneVsRestClassifier
-# from sklearn.svm import LinearSVC
-# from sklearn.svm import SVC
 import csv
 import pickle
 

@@ -33,10 +33,10 @@ class motor_imagine:
             #move down
             os.system("xdotool mousemove_relative 0 1")
         elif self.cursor_command== 0:
-            pass  
+            print('holding')  
 
-        self.rate=rospy.Rate(50)  
-        self.rate.sleep()   
+        # self.rate=rospy.Rate(50)  
+        # self.rate.sleep()   
 
 def main():
     rospy.init_node('motor_imagine',anonymous=True)
@@ -50,6 +50,6 @@ def main():
     except rospy.ROSInterruptException:pass
         
 
-    
+    rospy.spin()
 if __name__ == '__main__':
 	main()

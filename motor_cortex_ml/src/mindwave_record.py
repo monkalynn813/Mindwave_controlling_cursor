@@ -23,13 +23,7 @@ class recorder():
         self.rightcounter=0
         self.centercounter=0
         self.restcounter=0
-        # self.leftimage=pl.imread('IMG_1044.JPG')
-        # self.rightimage=pl.imread('174982.jpg')
-        # self.centerimage=None
-        # plt.ion()
-        # self.img=pl.imshow(self.leftimage)
-        # pl.pause(1.0)
-        # pl.draw()
+
         
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
     def fftcallback(self,data):
