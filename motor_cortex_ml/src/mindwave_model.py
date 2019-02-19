@@ -6,6 +6,7 @@ from std_msgs.msg import Int32
 from datastreaming.msg import ChannelData, Plotarray
 import csv
 import pickle
+from std_msgs.msg import String
 
 class classifier():
     def __init__(self):
@@ -13,7 +14,7 @@ class classifier():
         self.model_filename=self.modelpath+'mindwave_model.pkl'
         with open(self.model_filename,'rb') as file:
             self.mindwave_model=pickle.load(file)
-        self.mouse_publisher=rospy.Publisher('/mindcontrol/mouse_command',Int32,queue_size=10)
+        self.mouse_publisher=rospy.Publisher('/mindcontrol/mouse_command',Int32,queue_size=20)
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
 
         
@@ -36,7 +37,7 @@ class classifier():
         self.mouse_publisher.publish(self.command)
 
 def main():
-    rospy.init_node("mindwave_model",anonymous=True)
+    rospy.init_node("mindwave_model")
     
     try:
        

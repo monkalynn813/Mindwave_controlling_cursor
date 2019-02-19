@@ -14,7 +14,7 @@ class recorder():
     def __init__(self):
 
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
-        self.savepath=self.savedir+'record'+str(datetime.datetime.now())+'.csv'
+        self.savepath=self.savedir+'record_20raw2.csv'
         self.delim = ','
         self.recordsize=20
         self.detailsize=1250
@@ -26,6 +26,7 @@ class recorder():
 
         
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
+        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1
@@ -119,8 +120,8 @@ class recorder():
 def main():
     rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
     rospy.loginfo("===Try to stay rest====")
-    rospy.loginfo("===Please wait for 20s====")
-    rospy.sleep(20.0)
+    rospy.loginfo("===Please wait for 30s====")
+    rospy.sleep(30.0)
     
     try:
        

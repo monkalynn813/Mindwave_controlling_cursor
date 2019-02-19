@@ -18,7 +18,7 @@ class playback():
         
         # set path to datasets
         datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
-        csvname =datapath + 'record.csv'
+        csvname =datapath + 'record_20raw2.csv'
         data = np.loadtxt(csvname,delimiter = ',')
         
         # get input/output pairs
@@ -55,7 +55,7 @@ class playback():
         
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %1250==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
         # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
             self.raw_data=self.raw_data[-self.frame:]
