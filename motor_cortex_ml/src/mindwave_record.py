@@ -3,20 +3,19 @@
 import rospy
 import numpy as np
 from datastreaming.msg import ChannelData, Plotarray
-from matplotlib import pyplot as plt
 import time
 import random
 import sys
-import pylab as pl
 import datetime
+import os
 
 class recorder():
     def __init__(self):
 
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
-        self.savepath=self.savedir+'record_20raw2.csv'
+        self.savepath=self.savedir+'record_20raw_Feb_20.csv'
         self.delim = ','
-        self.recordsize=20
+        self.recordsize=4
         self.detailsize=1250
         self.detailcounter=0
         self.leftcounter=0
@@ -38,61 +37,68 @@ class recorder():
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
 
-        if self.detailcounter%self.detailsize==0 or self.detailcounter==0: #record 1250 samples every time call a direction
-            self.centercounter=0
-            self.restcounter=0
-            if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
-                call_which=random.randint(0,1) #random pick a direction to imagin 0=left; 1=right
-            elif self.leftcounter==self.recordsize and self.rightcounter<self.recordsize: call_which=1
-            elif self.leftcounter<self.recordsize and self.rightcounter==self.recordsize: call_which=0
-            else: raw_input('Acquisition finished, press ctrl+c to exit')
-            
-            if call_which==0:
-                self.func=self.focusleft
-                self.leftcounter+=1
-            else: 
-                self.func=self.focusright        
-                self.rightcounter+=1
+                 
         
-        if self.restcounter<=self.detailsize:
-            self.rest()
-            self.restcounter+=1
-            self.detailcounter=1
-        elif self.centercounter<=self.detailsize:
+        if self.restcounter<self.detailsize:
+            if self.leftcounter==self.recordsize and self.rightcounter==self.recordsize:
+                raw_input('Acquisition finished, press ctrl+c to exit')
+            else:
+                self.rest()
+                self.restcounter+=1
+            
+        elif self.centercounter<self.detailsize:
+            if self.centercounter==0: os.system("xdotool mousemove 960 540")
             self.focuscenter()
             self.centercounter+=1
-            self.detailcounter=1
-        else:
+            self.detailcounter=0
+
+        elif self.detailcounter<self.detailsize:
+            if self.detailcounter==0:
+                if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
+                    call_which=random.randint(0,1) #random pick a direction to imagin 0=left; 1=right
+                elif self.leftcounter==self.recordsize and self.rightcounter<self.recordsize: call_which=1
+                elif self.leftcounter<self.recordsize and self.rightcounter==self.recordsize: call_which=0
+                
+          
+                if call_which==0:
+                    self.func=self.focusleft
+                    self.leftcounter+=1
+                else: 
+                    self.func=self.focusright        
+                    self.rightcounter+=1  
+
+            if self.detailcounter==self.detailsize-1: 
+                self.centercounter=0
+                self.restcounter=0   
+
             self.func()
-            self.detailcounter=self.detailcounter+1
+            self.detailcounter+=1
         
         
     def focuscenter(self):
         sys.stdout.write('\r Focus on center  ++++++++++++++++++++     ')
         sys.stdout.flush()
-        # self.img.set_data(self.rightimage)
-        # pl.draw()
+
         label='0'
         self.writeinfile(label)
+        
     def focusleft(self):
         sys.stdout.write("\r <<<<<<<      imagine moving left hand     ")
         sys.stdout.flush()
-        # self.img.set_data(self.leftimage)
-        # pl.draw()
+
         label='-1'
         self.writeinfile(label)
+        if self.detailcounter==self.detailsize/2: os.system("xdotool mousemove_relative -- -20 0")
     def focusright(self):
         sys.stdout.write("\r imagine moving right hand        >>>>>>>  ")
         sys.stdout.flush()
-        # self.img.set_data(self.rightimage)
-        # pl.draw()
+
         label='1'         
         self.writeinfile(label)
+        if self.detailcounter==self.detailsize/2: os.system("xdotool mousemove_relative 20 0")
     def rest(self):
         sys.stdout.write("\r take a break                              ")
         sys.stdout.flush()
-        # label='9'            #for classifier training's slit purpose
-        # self.writeinfile(label)
 
     def writeinfile(self,label):
         row=''

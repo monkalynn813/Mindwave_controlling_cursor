@@ -55,7 +55,7 @@ class playback():
         
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %1250==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
         # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
             self.raw_data=self.raw_data[-self.frame:]
@@ -100,6 +100,8 @@ class playback():
         y = yi[range(int(L / 2))]
         # ysample= (2.0*abs(yi/L))[range(int(L/2))]
         return freq, abs(y)
+
+
 def main():
     rospy.init_node("data_playingback",anonymous=True)
     
