@@ -21,29 +21,28 @@ class datastreaming:
         self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
-        self.average_amp=np.zeros(self.channelnum).reshape(1,self.channelnum)
-        self.buff=2500  #number of data store in raw_data matrix
-        
+                
         self.band=(16,24) #desired bandpass boundary
         self.notch_val=60 #notch 60 for NA area
+        self.mode=rospy.get_param("~mode",'fft')
 
-        
+        #########data sampling################
         self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',ChannelData,queue_size=20)
         self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
-        self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
-        self.freq_publisher=rospy.Publisher('/mindcontrol/freq',Plotarray,queue_size=20)
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
         self.realtime_bpdata=ChannelData()
         self.realtime_rawdata=ChannelData()
+
+        #########plotting####################
         self.ampplot=Plotarray()
         self.freqplot=Plotarray()
-
-        self.mode=rospy.get_param("~mode",'fft')
-
+        self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
+        self.freq_publisher=rospy.Publisher('/mindcontrol/freq',Plotarray,queue_size=20)
+        
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %10==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
         # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
             self.raw_data=self.raw_data[-self.frame:]
@@ -66,7 +65,7 @@ class datastreaming:
                 setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
                 setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
                 # _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
-            # self.average_amp=np.append(self.average_amp,np.array([_average_amp]),axis=0) #Matrix of average amp for all channels through out time (for recording purpose)
+
 
             self.freqplot.channel1=np.ndarray.tolist(self.desired_freq) #plot
 

@@ -11,11 +11,11 @@ import os
 
 class recorder():
     def __init__(self):
-
+        savetag='_exp2'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
-        self.savepath=self.savedir+'record_20raw_Feb_20.csv'
+        self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
-        self.recordsize=4
+        self.recordsize=16
         self.detailsize=1250
         self.detailcounter=0
         self.leftcounter=0
@@ -41,13 +41,13 @@ class recorder():
         
         if self.restcounter<self.detailsize:
             if self.leftcounter==self.recordsize and self.rightcounter==self.recordsize:
-                raw_input('Acquisition finished, press ctrl+c to exit')
+                raw_input('\n Acquisition finished, press ctrl+c to exit')
             else:
                 self.rest()
                 self.restcounter+=1
             
         elif self.centercounter<self.detailsize:
-            if self.centercounter==0: os.system("xdotool mousemove 960 540")
+            if self.centercounter==0: os.system("xdotool mousemove 960 880")
             self.focuscenter()
             self.centercounter+=1
             self.detailcounter=0
@@ -76,28 +76,28 @@ class recorder():
         
         
     def focuscenter(self):
-        sys.stdout.write('\r Focus on center  ++++++++++++++++++++     ')
+        sys.stdout.write('\r                                ++++++++++++++                           ')
         sys.stdout.flush()
 
         label='0'
         self.writeinfile(label)
         
     def focusleft(self):
-        sys.stdout.write("\r <<<<<<<      imagine moving left hand     ")
+        sys.stdout.write('\r        <<<<<<<<<<<<<                                                   ')
         sys.stdout.flush()
 
         label='-1'
         self.writeinfile(label)
-        if self.detailcounter==self.detailsize/2: os.system("xdotool mousemove_relative -- -20 0")
+        if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative -- -20 0")
     def focusright(self):
-        sys.stdout.write("\r imagine moving right hand        >>>>>>>  ")
+        sys.stdout.write('\r                                                            >>>>>>>>>>>')
         sys.stdout.flush()
 
         label='1'         
         self.writeinfile(label)
-        if self.detailcounter==self.detailsize/2: os.system("xdotool mousemove_relative 20 0")
+        if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative 20 0")
     def rest(self):
-        sys.stdout.write("\r take a break                              ")
+        sys.stdout.write('\r                                take a break                           ')
         sys.stdout.flush()
 
     def writeinfile(self,label):
@@ -127,7 +127,10 @@ def main():
     rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
     rospy.loginfo("===Try to stay rest====")
     rospy.loginfo("===Please wait for 30s====")
-    rospy.sleep(30.0)
+    rospy.sleep(10.0)
+    print('+++ : focus on cneter\n <<<: imagine moving left \n >>>: imagine moving right')
+    
+    rospy.sleep(20.0)
     
     try:
        

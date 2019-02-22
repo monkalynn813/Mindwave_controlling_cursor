@@ -17,8 +17,9 @@ class playback():
     def __init__(self):
         
         # set path to datasets
+        savetag='_exp2'
         datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
-        csvname =datapath + 'record_20raw2.csv'
+        csvname =datapath + 'record'+savetag+'.csv'
         data = np.loadtxt(csvname,delimiter = ',')
         
         # get input/output pairs

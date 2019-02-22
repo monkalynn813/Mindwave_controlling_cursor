@@ -30,6 +30,7 @@ class classifier():
         self.fftamp8=data.channel8
 
         self.inputdata=np.array([[self.fftamp1,self.fftamp2,self.fftamp3,self.fftamp4,self.fftamp5,self.fftamp6,self.fftamp7,self.fftamp8]])
+        # self.inputdata=np.array([[self.fftamp3,self.fftamp4]])
         self.model_command()
     def model_command(self):
 
