@@ -19,7 +19,8 @@ class playback():
         # set path to datasets
         savetag='_exp2'
         datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
-        csvname =datapath + 'record'+savetag+'.csv'
+        # csvname =datapath + 'record'+savetag+'.csv'
+        csvname =datapath +'record_20rfft.csv'
         data = np.loadtxt(csvname,delimiter = ',')
         
         # get input/output pairs
@@ -38,14 +39,16 @@ class playback():
         self.notch_val=60 #notch 60 for NA area
         
         self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
-        self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',String,queue_size=20)
+        self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',ChannelData,queue_size=20)
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
+        self.realtime_rawdata=ChannelData()
     
     def play(self):
-        r=rospy.Rate(335)
+        r=rospy.Rate(50)#(335)
         for i in range(len(self.x)):
-            self.filter_fft(self.x[i])
+            self.non_filter(self.x[i])
+            # self.filter_fft(self.x[i])
             # self.data_publisher_tdomain.publish(str(self.x[i]))
             r.sleep()
             # rospy.sleep(0.002)
@@ -82,7 +85,15 @@ class playback():
             self.analysis_time=self.analysis_time+1
             
         self.raw_data.append(sample)
+
+    def non_filter(self,sample):
         
+        data=sample
+        for k in range(self.channelnum):
+            setattr(self.realtime_rawdata,"channel"+str(k+1),data[k])
+        self.data_publisher_fdomain.publish(self.realtime_rawdata) 
+  
+  
         
     def bandpass(self,start,stop,data,fs):
         bp_Hz = np.array([start, stop])
