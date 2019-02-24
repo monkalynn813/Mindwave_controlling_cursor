@@ -17,10 +17,10 @@ class playback():
     def __init__(self):
         
         # set path to datasets
-        savetag='_exp2'
+        savetag='_exp3'
         datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
-        # csvname =datapath + 'record'+savetag+'.csv'
-        csvname =datapath +'record_20rfft.csv'
+        csvname =datapath + 'record'+savetag+'.csv'
+        # csvname =datapath +'record_20rfft.csv'
         data = np.loadtxt(csvname,delimiter = ',')
         
         # get input/output pairs
@@ -45,7 +45,7 @@ class playback():
         self.realtime_rawdata=ChannelData()
     
     def play(self):
-        r=rospy.Rate(50)#(335)
+        r=rospy.Rate(25)#(335)
         for i in range(len(self.x)):
             self.non_filter(self.x[i])
             # self.filter_fft(self.x[i])

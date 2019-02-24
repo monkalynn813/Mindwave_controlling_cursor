@@ -11,12 +11,12 @@ import os
 
 class recorder():
     def __init__(self):
-        savetag='_exp2'
+        savetag='_exp5=6'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
-        self.recordsize=16
-        self.detailsize=1250
+        self.recordsize=20
+        self.detailsize=250
         self.detailcounter=0
         self.leftcounter=0
         self.rightcounter=0
@@ -24,8 +24,8 @@ class recorder():
         self.restcounter=0
 
         
-        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
-        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
+        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
+        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1

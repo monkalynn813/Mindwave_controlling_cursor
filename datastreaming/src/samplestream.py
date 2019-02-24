@@ -17,7 +17,7 @@ class datastreaming:
         rospy.sleep(1.0)
 
         self.fs=250 #record frequency for Cyton board
-        self.frame=750 #once the data matrix is N times this number, process DSP
+        self.frame=250 #moving window size for DSP
         self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
@@ -35,6 +35,7 @@ class datastreaming:
         self.realtime_rawdata=ChannelData()
 
         #########plotting####################
+        self.plot=rospy.get_param("~plot","False")
         self.ampplot=Plotarray()
         self.freqplot=Plotarray()
         self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
@@ -42,38 +43,33 @@ class datastreaming:
         
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %10==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
-        # if len(self.raw_data)!= 0 and len(self.raw_data) %self.frame ==0:
             self.raw_data=self.raw_data[-self.frame:]
-            
-            _average_amp=[]
-            ##Store buff number of data in the matrix for DSP
+
             channel_extract=np.array(self.raw_data)
             for k in range(self.channelnum):
                 
                 channel_data=channel_extract[:,k]
                 
                 self.freq,self.y=self.fft(channel_data,self.fs)##FFT for particular channel##
-                #average and log1p amp of desired frequency
+                
                 freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
                 self.desired_freq=self.freq[freq_ind]
                 self.amp_of_desired_freq=self.y[freq_ind]
-                    
                 average_amp_desired=np.mean(self.amp_of_desired_freq)
-                # print(average_amp_desired)
                 setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
-                setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
-                # _average_amp.append(average_amp_desired)   #put all channel's average amp for particular frequency in matrix             
+            ##################plotting purpose####################    
+                if self.plot:
+                    setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
+            if self.plot:
+                self.freqplot.channel1=np.ndarray.tolist(self.desired_freq) #plot
+                self.fft_publisher.publish(self.ampplot) #plot
+                self.freq_publisher.publish(self.freqplot) #plot
+            #####################################################
 
-
-            self.freqplot.channel1=np.ndarray.tolist(self.desired_freq) #plot
-
-            self.fft_publisher.publish(self.ampplot) #plot
-            self.freq_publisher.publish(self.freqplot) #plot
             self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
             self.analysis_time=self.analysis_time+1
-
         self.raw_data.append(sample.channel_data)
         if rospy.is_shutdown():
             self.eeg.stop()
@@ -144,7 +140,7 @@ class datastreaming:
             callback=self.filter_fft
         elif self.mode=='record':
             rospy.loginfo("=====record mode======")
-            callback=self.non_filter
+            callback=self.filter_fft
         elif self.mode=='bandpass':
             callback=self.filter_bp
 

@@ -6,6 +6,7 @@
   
   <node name="samplestream" pkg="datastreaming" type="samplestream.py" output='screen' >
     <param name="mode" value="$(arg mode)"/>
+    <param name="plot" value="$(arg plot)"/>
   </node>
 
 
