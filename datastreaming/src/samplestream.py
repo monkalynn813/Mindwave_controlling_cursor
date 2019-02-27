@@ -17,12 +17,12 @@ class datastreaming:
         rospy.sleep(1.0)
 
         self.fs=250 #record frequency for Cyton board
-        self.frame=250 #moving window size for DSP
+        self.frame=500 #moving window size for DSP
         self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
                 
-        self.band=(16,24) #desired bandpass boundary
+        self.band=(7,13) #desired bandpass boundary
         self.notch_val=60 #notch 60 for NA area
         self.mode=rospy.get_param("~mode",'fft')
 

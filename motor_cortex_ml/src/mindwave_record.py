@@ -11,7 +11,7 @@ import os
 
 class recorder():
     def __init__(self):
-        savetag='_exp5=6'
+        savetag='_exp6'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
