@@ -11,21 +11,29 @@ import os
 
 class recorder():
     def __init__(self):
-        savetag='_exp6'
+        savetag='_exp9_test'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
-        self.recordsize=20
-        self.detailsize=250
-        self.detailcounter=0
+        self.fs=250
+        self.recordsize=2 #number of trails for each task
+        self.detailsize=7.5*self.fs # number of sample in each trail
+        self.baseline_cross_time=6*self.fs  #time of showing cross in baseline trail
+        ######parameter for each left/right trail
+        self.intrail_cross_time=2*self.fs 
+        self.intrail_cue_time=1.5*self.fs
+        self.intrail_holdmi_time=2.5*self.fs
+        self.intrail_break_time=1.5 *self.fs
+        self.detailcounter=0  #counter for counting number of samples recorded in each left/right trail
+
         self.leftcounter=0
         self.rightcounter=0
         self.centercounter=0
         self.restcounter=0
 
         
-        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
-        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
+        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
+        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1
@@ -37,27 +45,22 @@ class recorder():
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
 
-                 
-        
-        if self.restcounter<self.detailsize:
-            if self.leftcounter==self.recordsize and self.rightcounter==self.recordsize:
-                raw_input('\n Acquisition finished, press ctrl+c to exit')
-            else:
-                self.rest()
-                self.restcounter+=1
-            
-        elif self.centercounter<self.detailsize:
-            if self.centercounter==0: os.system("xdotool mousemove 960 880")
-            self.focuscenter()
-            self.centercounter+=1
-            self.detailcounter=0
-
+        if self.centercounter<self.recordsize:
+            if self.detailcounter<self.detailsize:
+                # if self.centercounter==0: os.system("xdotool mousemove 960 880")
+                self.focuscenter()
+                self.detailcounter+=1
+                if self.detailcounter==self.detailsize:
+                    self.detailcounter=0
+                    self.centercounter+=1
         elif self.detailcounter<self.detailsize:
             if self.detailcounter==0:
                 if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
                     call_which=random.randint(0,1) #random pick a direction to imagin 0=left; 1=right
                 elif self.leftcounter==self.recordsize and self.rightcounter<self.recordsize: call_which=1
                 elif self.leftcounter<self.recordsize and self.rightcounter==self.recordsize: call_which=0
+                elif self.leftcounter==self.recordsize and self.rightcounter==self.recordsize:
+                    raw_input('\n Acquisition finished, press ctrl+c to exit')
                 
           
                 if call_which==0:
@@ -67,35 +70,58 @@ class recorder():
                     self.func=self.focusright        
                     self.rightcounter+=1  
 
-            if self.detailcounter==self.detailsize-1: 
-                self.centercounter=0
-                self.restcounter=0   
-
+            
             self.func()
             self.detailcounter+=1
+            if self.detailcounter==self.detailsize: self.detailcounter=0  #roll over trail
+            
         
         
     def focuscenter(self):
-        sys.stdout.write('\r                                ++++++++++++++                           ')
-        sys.stdout.flush()
-
+        if self.detailcounter<self.baseline_cross_time:
+            sys.stdout.write('\r                                ++++++++++++++                           ')
+            sys.stdout.flush()
+        elif self.detailcounter<self.detailsize:
+            sys.stdout.write('\r                                take a break                           ')
+            sys.stdout.flush()  
+        
         label='0'
         self.writeinfile(label)
         
     def focusleft(self):
-        sys.stdout.write('\r        <<<<<<<<<<<<<                                                   ')
-        sys.stdout.flush()
+        if self.detailcounter<self.intrail_cross_time:
+            sys.stdout.write('\r                                ++++++++++++++                           ')
+            sys.stdout.flush()        
+        elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
+            sys.stdout.write('\r        <<<<<<<<<<<<<           ++++++++++++++                           ')
+            sys.stdout.flush()
+        elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
+            sys.stdout.write('\r                                ++++++++++++++                           ')
+            sys.stdout.flush()            
+        elif self.detailcounter<self.detailsize:
+            sys.stdout.write('\r                                take a break                           ')
+            sys.stdout.flush()
 
         label='-1'
         self.writeinfile(label)
-        if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative -- -20 0")
+        # if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative -- -20 0")
     def focusright(self):
-        sys.stdout.write('\r                                                            >>>>>>>>>>>')
-        sys.stdout.flush()
-
+        if self.detailcounter<self.intrail_cross_time:
+            sys.stdout.write('\r                                ++++++++++++++                           ')
+            sys.stdout.flush()        
+        elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
+            sys.stdout.write('\r                                ++++++++++++++              >>>>>>>>>>>  ')
+            sys.stdout.flush()
+        elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
+            sys.stdout.write('\r                                ++++++++++++++                           ')
+            sys.stdout.flush()            
+        elif self.detailcounter<self.detailsize: 
+            sys.stdout.write('\r                                take a break                           ')
+            sys.stdout.flush()
+                
         label='1'         
         self.writeinfile(label)
-        if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative 20 0")
+        # if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative 20 0")
     def rest(self):
         sys.stdout.write('\r                                take a break                           ')
         sys.stdout.flush()
@@ -130,7 +156,7 @@ def main():
     rospy.sleep(10.0)
     print('+++ : focus on cneter\n <<<: imagine moving left \n >>>: imagine moving right')
     
-    rospy.sleep(20.0)
+    rospy.sleep(1.0)
     
     try:
        

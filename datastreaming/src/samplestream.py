@@ -140,7 +140,7 @@ class datastreaming:
             callback=self.filter_fft
         elif self.mode=='record':
             rospy.loginfo("=====record mode======")
-            callback=self.filter_fft
+            callback=self.non_filter
         elif self.mode=='bandpass':
             callback=self.filter_bp
 
