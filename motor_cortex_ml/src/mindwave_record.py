@@ -8,6 +8,8 @@ import random
 import sys
 import datetime
 import os
+import cv2, cv_bridge
+from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
@@ -30,7 +32,14 @@ class recorder():
         self.rightcounter=0
         self.centercounter=0
         self.restcounter=0
-
+        #####GUI
+        ##read image and store ahead##
+        self.crossimg=cv2.imread('/home/jingyan/Documents/ME499-WinterProject/mindwave/src/image/cross.png')
+        self.leftimg=cv2.imread('/home/jingyan/Documents/ME499-WinterProject/mindwave/src/image/left.png')
+        self.rightimg=cv2.imread('/home/jingyan/Documents/ME499-WinterProject/mindwave/src/image/right.png')
+        self.restimg=cv2.imread('/home/jingyan/Documents/ME499-WinterProject/mindwave/src/image/rest.png')
+        self.image_pub=rospy.Publisher("/mindcontrol/GUI_image",Image,queue_size=10)
+        self.bridge=cv_bridge.CvBridge()
         
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
         # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
@@ -74,33 +83,39 @@ class recorder():
             self.func()
             self.detailcounter+=1
             if self.detailcounter==self.detailsize: self.detailcounter=0  #roll over trail
-            
         
-        
+        self.image_pub.publish(self.bridge.cv2_to_imgmsg(self.img,'bgr8'))    
+                
     def focuscenter(self):
         if self.detailcounter<self.baseline_cross_time:
             sys.stdout.write('\r                                ++++++++++++++                           ')
             sys.stdout.flush()
+            self.img=self.crossimg
+         
         elif self.detailcounter<self.detailsize:
             sys.stdout.write('\r                                take a break                           ')
             sys.stdout.flush()  
-        
+            self.img=self.restimg
         label='0'
         self.writeinfile(label)
         
     def focusleft(self):
         if self.detailcounter<self.intrail_cross_time:
             sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()        
+            sys.stdout.flush()
+            self.img=self.crossimg        
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
             sys.stdout.write('\r        <<<<<<<<<<<<<           ++++++++++++++                           ')
             sys.stdout.flush()
+            self.img=self.leftimg
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
             sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()            
+            sys.stdout.flush()
+            self.img=self.crossimg            
         elif self.detailcounter<self.detailsize:
             sys.stdout.write('\r                                take a break                           ')
             sys.stdout.flush()
+            self.img=self.restimg
 
         label='-1'
         self.writeinfile(label)
@@ -108,16 +123,20 @@ class recorder():
     def focusright(self):
         if self.detailcounter<self.intrail_cross_time:
             sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()        
+            sys.stdout.flush()
+            self.img=self.crossimg        
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
             sys.stdout.write('\r                                ++++++++++++++              >>>>>>>>>>>  ')
             sys.stdout.flush()
+            self.img=self.rightimg
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
             sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()            
+            sys.stdout.flush()
+            self.img=self.crossimg            
         elif self.detailcounter<self.detailsize: 
             sys.stdout.write('\r                                take a break                           ')
             sys.stdout.flush()
+            self.img=self.restimg
                 
         label='1'         
         self.writeinfile(label)
