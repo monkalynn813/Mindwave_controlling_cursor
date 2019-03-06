@@ -13,12 +13,12 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp9_test'
+        savetag='_exp10_sec1_run6'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
         self.fs=250
-        self.recordsize=2 #number of trails for each task
+        self.recordsize=10 #number of trails for each task
         self.detailsize=7.5*self.fs # number of sample in each trail
         self.baseline_cross_time=6*self.fs  #time of showing cross in baseline trail
         ######parameter for each left/right trail
@@ -27,6 +27,8 @@ class recorder():
         self.intrail_holdmi_time=2.5*self.fs
         self.intrail_break_time=1.5 *self.fs
         self.detailcounter=0  #counter for counting number of samples recorded in each left/right trail
+        self.beepfreq=1000  #1kHZ
+        self.beepduration=0.07  #70ms
 
         self.leftcounter=0
         self.rightcounter=0
@@ -64,6 +66,7 @@ class recorder():
                     self.centercounter+=1
         elif self.detailcounter<self.detailsize:
             if self.detailcounter==0:
+                os.system('play -nq -t alsa synth {} sine {}'.format(self.beepduration,self.beepfreq))
                 if self.leftcounter<self.recordsize and self.rightcounter<self.recordsize:
                     call_which=random.randint(0,1) #random pick a direction to imagin 0=left; 1=right
                 elif self.leftcounter==self.recordsize and self.rightcounter<self.recordsize: call_which=1
@@ -88,33 +91,33 @@ class recorder():
                 
     def focuscenter(self):
         if self.detailcounter<self.baseline_cross_time:
-            sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.crossimg
          
         elif self.detailcounter<self.detailsize:
-            sys.stdout.write('\r                                take a break                           ')
-            sys.stdout.flush()  
+            # sys.stdout.write('\r                                take a break                           ')
+            # sys.stdout.flush()  
             self.img=self.restimg
         label='0'
         self.writeinfile(label)
         
     def focusleft(self):
         if self.detailcounter<self.intrail_cross_time:
-            sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.crossimg        
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
-            sys.stdout.write('\r        <<<<<<<<<<<<<           ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r        <<<<<<<<<<<<<           ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.leftimg
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
-            sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.crossimg            
         elif self.detailcounter<self.detailsize:
-            sys.stdout.write('\r                                take a break                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                take a break                           ')
+            # sys.stdout.flush()
             self.img=self.restimg
 
         label='-1'
@@ -122,20 +125,20 @@ class recorder():
         # if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative -- -20 0")
     def focusright(self):
         if self.detailcounter<self.intrail_cross_time:
-            sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.crossimg        
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time:
-            sys.stdout.write('\r                                ++++++++++++++              >>>>>>>>>>>  ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++              >>>>>>>>>>>  ')
+            # sys.stdout.flush()
             self.img=self.rightimg
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
-            sys.stdout.write('\r                                ++++++++++++++                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                ++++++++++++++                           ')
+            # sys.stdout.flush()
             self.img=self.crossimg            
         elif self.detailcounter<self.detailsize: 
-            sys.stdout.write('\r                                take a break                           ')
-            sys.stdout.flush()
+            # sys.stdout.write('\r                                take a break                           ')
+            # sys.stdout.flush()
             self.img=self.restimg
                 
         label='1'         
@@ -175,7 +178,7 @@ def main():
     rospy.sleep(10.0)
     print('+++ : focus on cneter\n <<<: imagine moving left \n >>>: imagine moving right')
     
-    rospy.sleep(1.0)
+    rospy.sleep(10.0)
     
     try:
        

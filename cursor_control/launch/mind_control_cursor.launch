@@ -17,6 +17,9 @@
 name="mindwave_record" pkg="motor_cortex_ml" type="mindwave_record.py" output='screen'  
     if= "$(eval mode == 'record')"/> 
 <node 
+name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" 
+    if= "$(eval mode == 'record')"/> 
+<node 
     name="cursorcontrol" pkg="cursor_control" type="cursorcontrol.py" 
         if= "$(eval mode == 'fft')"/>
 <node 
