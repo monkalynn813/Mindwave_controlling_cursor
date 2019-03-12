@@ -57,8 +57,8 @@ class datastreaming:
             self.raw_data=self.raw_data[-self.frame:]
 
             channel_extract=np.array(self.raw_data)
-            csd_input=channel_extract.T
-            channel_extract=csd(csd_input,self.G,self.H)
+            # csd_input=channel_extract.T
+            # channel_extract=csd(csd_input,self.G,self.H)
                         
             for k in range(self.channelnum):
                 
@@ -89,7 +89,9 @@ class datastreaming:
             self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
             # self.data_publisher_fdomain2.publish(self.average_amp_sample2)
             self.analysis_time=self.analysis_time+1
-        self.raw_data.append(sample.channel_data)
+        csd_input=np.array(sample.channel_data).reshape(-1,1)
+        csd_output=(csd(csd_input,self.G,self.H).reshape(self.channelnum,))
+        self.raw_data.append(csd_output)
         if rospy.is_shutdown():
             self.eeg.stop()
     def filter_bp(self,sample):

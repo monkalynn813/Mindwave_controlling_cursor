@@ -13,7 +13,7 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp13_sec4_run2'
+        savetag='_exp13_sec5_run3'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
