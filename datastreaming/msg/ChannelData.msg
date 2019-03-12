@@ -7,3 +7,11 @@ float64 channel5
 float64 channel6
 float64 channel7
 float64 channel8
+float64 channel11
+float64 channel12
+float64 channel13
+float64 channel14
+float64 channel15
+float64 channel16
+float64 channel17
+float64 channel18

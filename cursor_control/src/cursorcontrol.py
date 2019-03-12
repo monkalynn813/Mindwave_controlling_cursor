@@ -20,18 +20,18 @@ class motor_imagine:
     def move_mouse(self):
         # self.cursor_command=1
 
-        if self.cursor_command == -1:
+        if self.cursor_command == 1:
             #move left
             os.system("xdotool mousemove_relative -- -1 0")
-        elif self.cursor_command == 1:
+        elif self.cursor_command == 2:
             #move right
             os.system("xdotool mousemove_relative 1 0")
-        elif self.cursor_command ==3:
-            #move up
-            os.system("xdotool mousemove_relative -- 0 -1")
-        elif self.cursor_command==4:
+        # elif self.cursor_command ==3:
+        #     #move up
+        #     os.system("xdotool mousemove_relative -- 0 -1")
+        # elif self.cursor_command==4:
             #move down
-            os.system("xdotool mousemove_relative 0 1")
+            # os.system("xdotool mousemove_relative 0 1")
         elif self.cursor_command== 0: pass
             # print('holding')  
 

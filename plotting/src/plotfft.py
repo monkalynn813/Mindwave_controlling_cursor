@@ -8,7 +8,7 @@ from std_msgs.msg import String
 from matplotlib import pyplot as plt
 from datastreaming.msg import Plotarray
 import matplotlib.animation as animation
-
+from sklearn.preprocessing import MinMaxScaler
 class plotfft():
     def __init__(self):
         
@@ -35,8 +35,11 @@ class plotfft():
         self.fftamp6=data.channel6
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
-        
-        
+        # prestandard=np.array([self.fftamp1,self.fftamp2,self.fftamp3,self.fftamp4,self.fftamp5,self.fftamp6,self.fftamp7,self.fftamp8])
+        # scaler=MinMaxScaler()
+        # standard_data=scaler.fit_transform(prestandard)
+        # for i in range(1,9):
+        #     setattr(self,'fftamp'+str(i),standard_data[i-1])
     def freqcallback(self,data):
         self.fftfreq=data.channel1
     def animate11(self,i):

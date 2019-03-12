@@ -13,19 +13,19 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp10_sec1_run7'
+        savetag='_exp13_sec4_run2'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
-        self.fs=250
+        self.fs=25
         self.recordsize=10 #number of trails for each task
-        self.detailsize=7.5*self.fs # number of sample in each trail
+        self.detailsize=8*self.fs # number of sample in each trail
         self.baseline_cross_time=6*self.fs  #time of showing cross in baseline trail
         ######parameter for each left/right trail
         self.intrail_cross_time=2*self.fs 
-        self.intrail_cue_time=1.5*self.fs
-        self.intrail_holdmi_time=2.5*self.fs
-        self.intrail_break_time=1.5 *self.fs
+        self.intrail_cue_time=2*self.fs
+        self.intrail_holdmi_time=2*self.fs
+        self.intrail_break_time=2 *self.fs
         self.detailcounter=0  #counter for counting number of samples recorded in each left/right trail
         self.beepfreq=1000  #1kHZ
         self.beepduration=0.07  #70ms
@@ -43,8 +43,10 @@ class recorder():
         self.image_pub=rospy.Publisher("/mindcontrol/GUI_image",Image,queue_size=10)
         self.bridge=cv_bridge.CvBridge()
         
-        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
-        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
+        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/filtered_data',ChannelData,self.fftcallback)
+        # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp2',ChannelData,self.secondfftcallback)
+        self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
+    
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1
@@ -55,6 +57,15 @@ class recorder():
         self.fftamp6=data.channel6
         self.fftamp7=data.channel7
         self.fftamp8=data.channel8
+        self.fftamp11=data.channel11
+        self.fftamp12=data.channel12
+        self.fftamp13=data.channel13
+        self.fftamp14=data.channel14
+        self.fftamp15=data.channel15
+        self.fftamp16=data.channel16
+        self.fftamp17=data.channel17
+        self.fftamp18=data.channel18
+
 
         if self.centercounter<self.recordsize:
             if self.detailcounter<self.detailsize:
@@ -94,13 +105,15 @@ class recorder():
             # sys.stdout.write('\r                                ++++++++++++++                           ')
             # sys.stdout.flush()
             self.img=self.crossimg
-         
+            if self.detailcounter>=1*self.fs+self.intrail_cross_time: #start to write in file after 0.5s of cue
+                label='0'
+                self.writeinfile(label)        
         elif self.detailcounter<self.detailsize:
             # sys.stdout.write('\r                                take a break                           ')
             # sys.stdout.flush()  
             self.img=self.restimg
-        label='0'
-        self.writeinfile(label)
+        # label='0'
+        # self.writeinfile(label)
         
     def focusleft(self):
         if self.detailcounter<self.intrail_cross_time:
@@ -111,17 +124,22 @@ class recorder():
             # sys.stdout.write('\r        <<<<<<<<<<<<<           ++++++++++++++                           ')
             # sys.stdout.flush()
             self.img=self.leftimg
+            if self.detailcounter>=1*self.fs+self.intrail_cross_time: #start to write in file after 0.5s of cue
+                label='1'
+                self.writeinfile(label)
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
             # sys.stdout.write('\r                                ++++++++++++++                           ')
             # sys.stdout.flush()
-            self.img=self.crossimg            
+            self.img=self.crossimg
+            label='1'
+            self.writeinfile(label)            
         elif self.detailcounter<self.detailsize:
             # sys.stdout.write('\r                                take a break                           ')
             # sys.stdout.flush()
             self.img=self.restimg
 
-        label='-1'
-        self.writeinfile(label)
+        # label='1'
+        # self.writeinfile(label)
         # if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative -- -20 0")
     def focusright(self):
         if self.detailcounter<self.intrail_cross_time:
@@ -132,39 +150,82 @@ class recorder():
             # sys.stdout.write('\r                                ++++++++++++++              >>>>>>>>>>>  ')
             # sys.stdout.flush()
             self.img=self.rightimg
+            if self.detailcounter>=1*self.fs+self.intrail_cross_time: #start to write in file after 0.5s of cue
+                label='2'
+                self.writeinfile(label) 
         elif self.detailcounter<self.intrail_cross_time+self.intrail_cue_time+self.intrail_holdmi_time:
             # sys.stdout.write('\r                                ++++++++++++++                           ')
             # sys.stdout.flush()
-            self.img=self.crossimg            
+            self.img=self.crossimg
+            label='2'
+            self.writeinfile(label)            
         elif self.detailcounter<self.detailsize: 
             # sys.stdout.write('\r                                take a break                           ')
             # sys.stdout.flush()
             self.img=self.restimg
                 
-        label='1'         
-        self.writeinfile(label)
+        # label='1'         
+        # self.writeinfile(label)
         # if self.detailcounter==self.detailsize/2 or self.detailcounter==self.detailsize-10: os.system("xdotool mousemove_relative 20 0")
     def rest(self):
         sys.stdout.write('\r                                take a break                           ')
         sys.stdout.flush()
 
+    # def writeinfile(self,label):
+    #     row=''
+    #     row += str(self.fftamp1)
+    #     row += self.delim
+    #     row += str(self.fftamp2)
+    #     row += self.delim
+    #     row += str(self.fftamp3)
+    #     row += self.delim
+    #     row += str(self.fftamp4)
+    #     row += self.delim
+    #     row += str(self.fftamp5)
+    #     row += self.delim
+    #     row += str(self.fftamp6)
+    #     row += self.delim
+    #     row += str(self.fftamp7)
+    #     row += self.delim
+    #     row += str(self.fftamp8)
+    #     row += self.delim
+    #     row += str(label)
+    #     row += '\n'
+    #     with open(self.savepath,'a') as f:
+    #         f.write(row)
     def writeinfile(self,label):
         row=''
         row += str(self.fftamp1)
         row += self.delim
+        row += str(self.fftamp11)
+        row += self.delim
         row += str(self.fftamp2)
+        row += self.delim
+        row += str(self.fftamp12)
         row += self.delim
         row += str(self.fftamp3)
         row += self.delim
+        row += str(self.fftamp13)
+        row += self.delim
         row += str(self.fftamp4)
+        row += self.delim
+        row += str(self.fftamp14)
         row += self.delim
         row += str(self.fftamp5)
         row += self.delim
+        row += str(self.fftamp15)
+        row += self.delim
         row += str(self.fftamp6)
+        row += self.delim
+        row += str(self.fftamp16)
         row += self.delim
         row += str(self.fftamp7)
         row += self.delim
+        row += str(self.fftamp17)
+        row += self.delim
         row += str(self.fftamp8)
+        row += self.delim
+        row += str(self.fftamp18)
         row += self.delim
         row += str(label)
         row += '\n'
@@ -175,12 +236,13 @@ def main():
     rospy.init_node("mindwave_moter_trainning_record",anonymous=True)
     rospy.loginfo("===Try to stay rest====")
     rospy.loginfo("===Please wait for 30s====")
-    rospy.sleep(10.0)
-    print('+++ : focus on cneter\n <<<: imagine moving left \n >>>: imagine moving right')
-    
-    rospy.sleep(10.0)
+
     
     try:
+        rospy.sleep(10.0)
+        print('+++ : focus on cneter\n <<<: imagine moving left \n >>>: imagine moving right')
+        
+        rospy.sleep(10.0)
        
         recored=recorder()
 

@@ -7,7 +7,8 @@ from scipy import signal
 from matplotlib import pyplot as plt
 from datastreaming.msg import ChannelData, Plotarray
 from math import log1p
-
+from mind_csd import csd
+from mind_csd import gaussian_smoothing
 
 class datastreaming:
     def __init__(self):
@@ -17,20 +18,23 @@ class datastreaming:
         rospy.sleep(1.0)
 
         self.fs=250 #record frequency for Cyton board
-        self.frame=500 #moving window size for DSP
+        self.frame=250 #moving window size for DSP
         self.channelnum=8 #using 8 channel Cyton biosensing board
         self.raw_data=[]
         self.filtered_data=[]
                 
         self.band=(7,13) #desired bandpass boundary
+        self.band2=(15,25)
         self.notch_val=60 #notch 60 for NA area
         self.mode=rospy.get_param("~mode",'fft')
 
         #########data sampling################
         self.data_publisher_tdomain=rospy.Publisher('/mindcontrol/filtered_data',ChannelData,queue_size=20)
         self.data_publisher_fdomain=rospy.Publisher('/mindcontrol/average_amp',ChannelData,queue_size=20)
+        # self.data_publisher_fdomain2=rospy.Publisher('/mindcontrol/average_amp2',ChannelData,queue_size=20)
         self.analysis_time=0
         self.average_amp_sample=ChannelData()
+        # self.average_amp_sample2=ChannelData()
         self.realtime_bpdata=ChannelData()
         self.realtime_rawdata=ChannelData()
 
@@ -40,18 +44,26 @@ class datastreaming:
         self.freqplot=Plotarray()
         self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
         self.freq_publisher=rospy.Publisher('/mindcontrol/freq',Plotarray,queue_size=20)
-        
+        ##########
+        csdpath='/home/jingyan/Documents/ME499-WinterProject/CSDtoolbox/'
+        csvnameG=csdpath+'G_mon1.csv'
+        self.G = np.loadtxt(csvnameG,delimiter = ',')
+        csvnameH=csdpath+'H_mon1.csv'
+        self.H = np.loadtxt(csvnameH,delimiter = ',')
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %10==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
             self.raw_data=self.raw_data[-self.frame:]
 
             channel_extract=np.array(self.raw_data)
+            csd_input=channel_extract.T
+            channel_extract=csd(csd_input,self.G,self.H)
+                        
             for k in range(self.channelnum):
                 
                 channel_data=channel_extract[:,k]
-                
+
                 self.freq,self.y=self.fft(channel_data,self.fs)##FFT for particular channel##
                 
                 freq_ind=np.where((self.freq>=self.band[0])&(self.freq<=self.band[1]))[0] #take diresed frequency
@@ -59,6 +71,12 @@ class datastreaming:
                 self.amp_of_desired_freq=self.y[freq_ind]
                 average_amp_desired=np.mean(self.amp_of_desired_freq)
                 setattr(self.average_amp_sample,"channel"+str(k+1),average_amp_desired)
+
+                freq_ind2=np.where((self.freq>=self.band2[0])&(self.freq<=self.band2[1]))[0]
+                self.desired_freq2=self.freq[freq_ind2]
+                self.amp_of_desired_freq2=self.y[freq_ind2]
+                average_amp_desired2=np.mean(self.amp_of_desired_freq2)
+                setattr(self.average_amp_sample,"channel1"+str(k+1),average_amp_desired2)
             ##################plotting purpose####################    
                 if self.plot:
                     setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
@@ -69,6 +87,7 @@ class datastreaming:
             #####################################################
 
             self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
+            # self.data_publisher_fdomain2.publish(self.average_amp_sample2)
             self.analysis_time=self.analysis_time+1
         self.raw_data.append(sample.channel_data)
         if rospy.is_shutdown():
@@ -140,7 +159,7 @@ class datastreaming:
             callback=self.filter_fft
         elif self.mode=='record':
             rospy.loginfo("=====record mode======")
-            callback=self.non_filter
+            callback=self.filter_fft
         elif self.mode=='bandpass':
             callback=self.filter_bp
 

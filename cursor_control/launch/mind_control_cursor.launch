@@ -23,7 +23,7 @@ name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view"
     name="cursorcontrol" pkg="cursor_control" type="cursorcontrol.py" 
         if= "$(eval mode == 'fft')"/>
 <node 
-    name="realtime_fft" pkg="plotting" type="plotfft.py" 
-        if= "$(eval plot == 'True')"/>
+    name="plotfft" pkg="plotting" type="plotfft.py" 
+        if= "$(eval plot =='True')"/>
 
 </launch>

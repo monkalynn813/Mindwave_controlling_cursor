@@ -5,26 +5,8 @@ from sklearn.preprocessing import LabelBinarizer
 import csv
 
 
-    # set path to datasets
-datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
-for run in range(1,7): #6runs for each session
-    savetag='_exp10_sec1_run'+str(run)
-    csvname =datapath + 'record'+savetag+'.csv'
-    data = np.loadtxt(csvname,delimiter = ',')
-    if run==1:
-        x = data[:,:-1]
-        y = data[:,-1]
-    else:
-        x=np.append(x,data[:,:-1],axis=0)
-        y=np.append(y,data[:,-1],axis=0)
-channel_num=8
-chunk=60
-fs=250
-band=(0.5,100)
-notchval=60
-samplesize=7.5*250
 
-train_data,train_labels=data_preposcessing(x,y,chunk,fs,band,notchval,samplesize)
+
 
 def bandpass(start,stop,data,fs):
     bp_Hz = np.array([start, stop])
@@ -106,3 +88,24 @@ def data_preposcessing(x,y,chunk,fs,band,nothval,samplesize,channel_num=8):
     lb = LabelBinarizer()
     label_enc=lb.fit_transform(labels)
     return CNNmatrices,labels
+
+        # set path to datasets
+datapath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/'
+for run in range(1,7): #6runs for each session
+    savetag='_exp10_sec1_run'+str(run)
+    csvname =datapath + 'record'+savetag+'.csv'
+    data = np.loadtxt(csvname,delimiter = ',')
+    if run==1:
+        x = data[:,:-1]
+        y = data[:,-1]
+    else:
+        x=np.append(x,data[:,:-1],axis=0)
+        y=np.append(y,data[:,-1],axis=0)
+channel_num=8
+chunk=60
+fs=250
+band=(0.5,100)
+notchval=60
+samplesize=7.5*250
+
+train_data,train_labels=data_preposcessing(x,y,chunk,fs,band,notchval,samplesize)
