@@ -11,7 +11,7 @@
 
 
 <node 
-    name="mindwave_model" pkg="motor_cortex_ml" type="mindwave_model.py" 
+    name="mindwave_model" pkg="motor_cortex_ml" type="mindwave_model.py" output='screen' 
         if= "$(eval mode == 'fft')"/>
 <node 
 name="mindwave_record" pkg="motor_cortex_ml" type="mindwave_record.py" output='screen'  

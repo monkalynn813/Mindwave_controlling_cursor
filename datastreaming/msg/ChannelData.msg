@@ -15,3 +15,11 @@ float64 channel15
 float64 channel16
 float64 channel17
 float64 channel18
+float64 channel21
+float64 channel22
+float64 channel23
+float64 channel24
+float64 channel25
+float64 channel26
+float64 channel27
+float64 channel28

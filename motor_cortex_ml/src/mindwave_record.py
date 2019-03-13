@@ -13,19 +13,19 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp13_sec5_run3'
+        savetag='_exp15_sec1_run2'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
-        self.fs=25
+        self.fs=50
         self.recordsize=10 #number of trails for each task
-        self.detailsize=8*self.fs # number of sample in each trail
+        self.detailsize=7.5*self.fs # number of sample in each trail
         self.baseline_cross_time=6*self.fs  #time of showing cross in baseline trail
         ######parameter for each left/right trail
         self.intrail_cross_time=2*self.fs 
-        self.intrail_cue_time=2*self.fs
-        self.intrail_holdmi_time=2*self.fs
-        self.intrail_break_time=2 *self.fs
+        self.intrail_cue_time=1.5*self.fs
+        self.intrail_holdmi_time=2.5*self.fs
+        self.intrail_break_time=1.5 *self.fs
         self.detailcounter=0  #counter for counting number of samples recorded in each left/right trail
         self.beepfreq=1000  #1kHZ
         self.beepduration=0.07  #70ms
@@ -65,6 +65,14 @@ class recorder():
         self.fftamp16=data.channel16
         self.fftamp17=data.channel17
         self.fftamp18=data.channel18
+        self.fftamp21=data.channel21
+        self.fftamp22=data.channel22
+        self.fftamp23=data.channel23
+        self.fftamp24=data.channel24
+        self.fftamp25=data.channel25
+        self.fftamp26=data.channel26
+        self.fftamp27=data.channel27
+        self.fftamp28=data.channel28        
 
 
         if self.centercounter<self.recordsize:
@@ -199,33 +207,49 @@ class recorder():
         row += self.delim
         row += str(self.fftamp11)
         row += self.delim
+        row += str(self.fftamp21)
+        row += self.delim
         row += str(self.fftamp2)
         row += self.delim
         row += str(self.fftamp12)
+        row += self.delim
+        row += str(self.fftamp22)
         row += self.delim
         row += str(self.fftamp3)
         row += self.delim
         row += str(self.fftamp13)
         row += self.delim
+        row += str(self.fftamp23)
+        row += self.delim
         row += str(self.fftamp4)
         row += self.delim
         row += str(self.fftamp14)
+        row += self.delim
+        row += str(self.fftamp24)
         row += self.delim
         row += str(self.fftamp5)
         row += self.delim
         row += str(self.fftamp15)
         row += self.delim
+        row += str(self.fftamp25)
+        row += self.delim
         row += str(self.fftamp6)
         row += self.delim
         row += str(self.fftamp16)
+        row += self.delim
+        row += str(self.fftamp26)
         row += self.delim
         row += str(self.fftamp7)
         row += self.delim
         row += str(self.fftamp17)
         row += self.delim
+        row += str(self.fftamp27)
+        row += self.delim
         row += str(self.fftamp8)
         row += self.delim
         row += str(self.fftamp18)
+        row += self.delim
+        row += str(self.fftamp28)
         row += self.delim
         row += str(label)
         row += '\n'

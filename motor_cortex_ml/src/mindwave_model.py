@@ -7,7 +7,7 @@ from datastreaming.msg import ChannelData, Plotarray
 import csv
 import pickle
 from std_msgs.msg import String
-
+from sklearn.preprocessing import MinMaxScaler
 class classifier():
     def __init__(self):
         self.modelpath = '/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/src/'
@@ -17,9 +17,9 @@ class classifier():
         self.mouse_publisher=rospy.Publisher('/mindcontrol/mouse_command',Int32,queue_size=20)
         # self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp2',ChannelData,self.secondfftcallback)
         self.fftamp_subscriber=rospy.Subscriber('/mindcontrol/average_amp',ChannelData,self.fftcallback)
-        
+        baseline_ref_name=self.modelpath+'baseline_ref.csv'
+        self.baseline_ref=np.loadtxt(baseline_ref_name,delimiter=',')
 
-  
     def fftcallback(self,data):
         
         self.fftamp1=data.channel1
@@ -38,16 +38,27 @@ class classifier():
         self.fftamp16=data.channel16
         self.fftamp17=data.channel17
         self.fftamp18=data.channel18
+        self.fftamp21=data.channel21
+        self.fftamp22=data.channel22
+        self.fftamp23=data.channel23
+        self.fftamp24=data.channel24
+        self.fftamp25=data.channel25
+        self.fftamp26=data.channel26
+        self.fftamp27=data.channel27
+        self.fftamp28=data.channel28  
 
-        self.inputdata=np.array([[self.fftamp1,self.fftamp11,
-                                self.fftamp2,self.fftamp12,
-                                self.fftamp3,self.fftamp13,
-                                self.fftamp4,self.fftamp14,
-                                self.fftamp5,self.fftamp15,
-                                self.fftamp6,self.fftamp16,
-                                self.fftamp7,self.fftamp17,
-                                self.fftamp8,self.fftamp18]])
-        # self.inputdata=np.array([[self.fftamp3,self.fftamp4]])
+        _inputdata=np.array([[self.fftamp1,self.fftamp11,self.fftamp21,
+                                self.fftamp2,self.fftamp12,self.fftamp22,
+                                self.fftamp3,self.fftamp13,self.fftamp23,
+                                self.fftamp4,self.fftamp14,self.fftamp24,
+                                self.fftamp5,self.fftamp15,self.fftamp25,
+                                self.fftamp6,self.fftamp16,self.fftamp26,
+                                self.fftamp7,self.fftamp17,self.fftamp27,
+                                self.fftamp8,self.fftamp18,self.fftamp28]])-self.baseline_ref
+        # scaler=MinMaxScaler()
+        # self.inputdata=scaler.fit_transform(_inputdata)
+        self.inputdata=_inputdata/self.baseline_ref
+        
         self.model_command()
     def model_command(self):
 

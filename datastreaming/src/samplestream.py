@@ -23,8 +23,9 @@ class datastreaming:
         self.raw_data=[]
         self.filtered_data=[]
                 
-        self.band=(7,13) #desired bandpass boundary
-        self.band2=(15,25)
+        self.band=(8,13) #desired bandpass boundary
+        self.band2=(4,8)
+        self.band3=(16,30)
         self.notch_val=60 #notch 60 for NA area
         self.mode=rospy.get_param("~mode",'fft')
 
@@ -52,13 +53,11 @@ class datastreaming:
         self.H = np.loadtxt(csvnameH,delimiter = ',')
     def filter_fft(self,sample):
           
-        if len(self.raw_data)>=self.frame and len(self.raw_data) %10==0:
+        if len(self.raw_data)>=self.frame and len(self.raw_data) %5==0:
             if self.analysis_time==0: print('=======frame initialized, start to analysis========')
             self.raw_data=self.raw_data[-self.frame:]
 
             channel_extract=np.array(self.raw_data)
-            # csd_input=channel_extract.T
-            # channel_extract=csd(csd_input,self.G,self.H)
                         
             for k in range(self.channelnum):
                 
@@ -77,6 +76,12 @@ class datastreaming:
                 self.amp_of_desired_freq2=self.y[freq_ind2]
                 average_amp_desired2=np.mean(self.amp_of_desired_freq2)
                 setattr(self.average_amp_sample,"channel1"+str(k+1),average_amp_desired2)
+
+                freq_ind3=np.where((self.freq>=self.band3[0])&(self.freq<=self.band3[1]))[0]
+                self.desired_freq3=self.freq[freq_ind3]
+                self.amp_of_desired_freq3=self.y[freq_ind3]
+                average_amp_desired3=np.mean(self.amp_of_desired_freq3)
+                setattr(self.average_amp_sample,"channel2"+str(k+1),average_amp_desired3)
             ##################plotting purpose####################    
                 if self.plot:
                     setattr(self.ampplot,"channel"+str(k+1),np.ndarray.tolist(self.amp_of_desired_freq)) #for plotting , comment when not plotting
@@ -89,6 +94,7 @@ class datastreaming:
             self.data_publisher_fdomain.publish(self.average_amp_sample) #!!! average amp at given frequency range
             # self.data_publisher_fdomain2.publish(self.average_amp_sample2)
             self.analysis_time=self.analysis_time+1
+
         csd_input=np.array(sample.channel_data).reshape(-1,1)
         csd_output=(csd(csd_input,self.G,self.H).reshape(self.channelnum,))
         self.raw_data.append(csd_output)
