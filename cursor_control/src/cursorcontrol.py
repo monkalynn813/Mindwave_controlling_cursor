@@ -9,21 +9,25 @@ class motor_imagine:
 
     def __init__(self):
         
-        
+        self.debounce_array=[]
         self.sample_data_sub=rospy.Subscriber('/mindcontrol/mouse_command',Int32,self.command_sign)
         
     def command_sign(self,data):
         self.cursor_command=data.data
+        self.debounce_array.append(self.cursor_command)
+        if self.debounce_array>=2:
+            self.debounce_array=self.debounce_array[-2:]
         print(self.cursor_command)
-        self.move_mouse()
+        if self.debounce_array[0]==self.debounce_array[1]:
+            self.move_mouse(self.debounce_array[0])
         
-    def move_mouse(self):
+    def move_mouse(self,com):
         # self.cursor_command=1
-
-        if self.cursor_command == 1:
+        
+        if com == 1:
             #move left
             os.system("xdotool mousemove_relative -- -1 0")
-        elif self.cursor_command == 2:
+        elif com == 2:
             #move right
             os.system("xdotool mousemove_relative 1 0")
         # elif self.cursor_command ==3:
@@ -32,7 +36,7 @@ class motor_imagine:
         # elif self.cursor_command==4:
             #move down
             # os.system("xdotool mousemove_relative 0 1")
-        elif self.cursor_command== 0: pass
+        # elif self.cursor_command== 0: pass
             # print('holding')  
 
         # self.rate=rospy.Rate(50)  
