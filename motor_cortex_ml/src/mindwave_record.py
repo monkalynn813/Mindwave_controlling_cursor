@@ -13,7 +13,7 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp16_sec1_realtime'
+        savetag='_exp18_sec1_run2'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
@@ -75,7 +75,7 @@ class recorder():
         self.fftamp28=data.channel28        
 
 
-        if self.centercounter<self.recordsize:
+        if self.centercounter<int(self.recordsize):
             if self.detailcounter<self.detailsize:
                 # if self.centercounter==0: os.system("xdotool mousemove 960 880")
                 self.focuscenter()

@@ -35,17 +35,4 @@ def csd(data,G,H,lam=1e-5,head=1.0):
     return X.T
 
 
-def gaussian_smoothing(data=None, filter_len=None, filter_sigma=None):
 
-    if filter_len is None:
-        if len(data) < 20.:
-            filter_len = 5
-        elif len(data) >= 100.:
-            filter_len = 10
-        else:
-            filter_len = int(len(data) / 10.) + 1
-    if filter_sigma is None:
-        filter_sigma = filter_len
-
-    gaus = gaussian(filter_len, filter_sigma)
-    return filters.convolve1d(data, gaus / gaus.sum(), mode='mirror') 

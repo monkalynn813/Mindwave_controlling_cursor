@@ -46,7 +46,7 @@ class datastreaming:
         self.fft_publisher=rospy.Publisher('/mindcontrol/fft',Plotarray,queue_size=20)
         self.freq_publisher=rospy.Publisher('/mindcontrol/freq',Plotarray,queue_size=20)
         ##########
-        csdpath='/home/jingyan/Documents/ME499-WinterProject/CSDtoolbox/'
+        csdpath='/home/jingyan/Documents/ME499-WinterProject/mindwave/src/datastreaming/src/'
         csvnameG=csdpath+'G_mon1.csv'
         self.G = np.loadtxt(csvnameG,delimiter = ',')
         csvnameH=csdpath+'H_mon1.csv'

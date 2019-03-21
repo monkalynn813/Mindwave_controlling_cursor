@@ -15,11 +15,11 @@ class motor_imagine:
     def command_sign(self,data):
         self.cursor_command=data.data
         self.debounce_array.append(self.cursor_command)
-        if self.debounce_array>=2:
+        if len(self.debounce_array)>=2:
             self.debounce_array=self.debounce_array[-2:]
-        print(self.cursor_command)
-        if self.debounce_array[0]==self.debounce_array[1]:
-            self.move_mouse(self.debounce_array[0])
+            print(self.cursor_command)
+            if self.debounce_array[0]==self.debounce_array[1]:
+                self.move_mouse(self.debounce_array[0])
         
     def move_mouse(self,com):
         # self.cursor_command=1
