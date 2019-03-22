@@ -61,13 +61,27 @@ The objective of this project is to control cursor movement on the computer by h
 - Script `mindwave_record.py` was created to help with recording training data for machine learning classification. One experiment contains two sessions and each sessions contains 6 runs. The procedure of each run is described as following figure.
 - ![training_procedure]()
 - Since an `1x 24` matrix is sent at 50Hz to recording node, each run will contains 7.5s x 50= 375 samples. Not all data in each run will be recorded in csv file, however, the samples with corresponding label (left=1, right=2, baseline=0) will be written in csv file after 0.5s of cue on screen, and will stop such writing before break. This process is providing feasibility of well-performed feature extraction.
-### Baselines
+### Baselines Standardize
 - Instead of common standardizing technique. A baseline data was computed from training data to extract feature better from class 'left' and 'right'. The baseline contains the normalized information of subject opening eyes without thinking any hands' movement in each experiment. The mean of large amount of samples within baseline label was computed to set as reference for left and right signal comparison. In order to standardize data, difference between samples and baseline information will be divided by baseline value as well. In another word, the data was represented as percentage drop or rise according to subject's electroencephalography baseline data.  
 ### Post Filter
-- A denouncing-like filter was the last layer of filter before actual mouse command. The filter stores last two command sent from classification model node and generate new command if needed based on history of mouse command. This filter provides a smoother performance of mouse movement even with some misclassification command sent from previous node.
+- A debouncing-like filter was the last layer of filter before actual mouse command. The filter stores last two command sent from classification model node and generate new command if needed based on history of mouse command. This filter provides a smoother performance of mouse movement even with some misclassification command sent from previous node.
 
 ## High-level description and included packages/ files
-### ROS package
+### Required Package List
+- [rqt_image_view](http://wiki.ros.org/rqt_image_view)
+- [plotjuggler](http://wiki.ros.org/plotjuggler)
+
+### High level description 
+The project can be functional mainly rely on three individual packages. A brief explanation of each package function is as following:
+- `datastreaming` : Streams raw data from EEG monitor (Ultracortex Mark IV headset and USB Dongle), applies CSD filter and compute FFT matrix, publishes filtered data at rostopic `'/mindcontrol/average_amp'`
+- `motor_cortex_ml`: Subscribes data from `datastream`, executes training experiment, and generates fitted model for classifications. This package also contains function of classify real-time data to mouse command published at rostopic `'/mindcontrol/mouse_command'`.
+- `cursor_control`: Subscribes mouse command from `mindwave_model.py` and applies debouncing filter before executing actual mouse movement.
+### Customized ROS message
+- ChannelData.msg
+- Plotarray.msg
+  
+### Package Breakdown
+**`datastreaming`**
 1. datastreaming
     Read data from EEG monitor and stream data through DSP callback function
 2. Machine learning model
