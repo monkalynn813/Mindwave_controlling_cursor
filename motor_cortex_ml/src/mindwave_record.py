@@ -13,12 +13,12 @@ from sensor_msgs.msg import Image
 
 class recorder():
     def __init__(self):
-        savetag='_exp18_sec1_run2'
+        savetag='_exp19_record_gui'
         self.savedir="/home/jingyan/Documents/ME499-WinterProject/mindwave/src/motor_cortex_ml/data/"
         self.savepath=self.savedir+'record'+savetag+'.csv'
         self.delim = ','
         self.fs=50
-        self.recordsize=10 #number of trails for each task
+        self.recordsize=1 #number of trails for each task
         self.detailsize=7.5*self.fs # number of sample in each trail
         self.baseline_cross_time=6*self.fs  #time of showing cross in baseline trail
         ######parameter for each left/right trail

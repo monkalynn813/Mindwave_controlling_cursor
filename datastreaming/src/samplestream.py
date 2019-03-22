@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from datastreaming.msg import ChannelData, Plotarray
 from math import log1p
 from mind_csd import csd
-from mind_csd import gaussian_smoothing
+
 
 class datastreaming:
     def __init__(self):

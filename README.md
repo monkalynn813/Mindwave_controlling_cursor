@@ -9,7 +9,7 @@ The objective of this project is to control cursor movement on the computer by h
 
 ![headset.JPG]()
 ## Project block diagram
-![script_structure.JPG](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/script_structure.JPG)
+![script_structure.JPG](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/script_structure.JPG =250x250)
 
 ## Hardware
 
@@ -43,7 +43,7 @@ The objective of this project is to control cursor movement on the computer by h
   - CH6: Cz (yello)
   - CH7: CP1 (red)
   - CH8: CP2 (brown)
-![montage.jpg](/home/jingyan/Documents/ME499-WinterProject/mindwave/src/image/montage.jpg)
+![montage.jpg](https://github.com/monkalynn813/Mindwave_controlling_cursor/blob/master/image/montage.jpg =250x250)
 
 - The electrodes were placed in this way based on the location of motor cortex area of human brain. Channel C3 and C4 are the places where bio potential fire when a person try to move their left or right hand. As known, brain reflex is reversed as actual body, C3 on the left brain is responsible for right hand while C4 and the right for left hand. Other electrodes were placed around C3 and C4 for enhancing signal because of volume conduction and helping with algorithm to get higher SNR. Two ear clips were used to set reference for voltage potential.  
 
@@ -60,7 +60,7 @@ The objective of this project is to control cursor movement on the computer by h
 ### Training Data 
 - Script `mindwave_record.py` was created to help with recording training data for machine learning classification. One experiment contains two sessions and each sessions contains 6 runs. The procedure of each run is described as following figure.
 - ![training_procedure]()
-- Since an `1x 24` matrix is sent at 50Hz to recording node, each run will contains 7.5s x 50= 375 samples. Not all data in each run will be recorded in csv file, however, the samples with corresponding label (left=1, right=2, baseline=0) will be written in csv file after 0.5s of cue on screen, and will stop such writing before break. This process is providing feasibility of well-performed feature extraction.
+- Since an `1x 24` matrix is sent at 50Hz to recording node, each run will contains 30 tasks, which contains 7.5s x 50= 375 samples. First 10 tasks in each run will be fixed cross on screen only for baseline purpose. Not all data in each run will be recorded in csv file, however, the samples with corresponding label (left=1, right=2, baseline=0) will be written in csv file after 0.5s of cue on screen, and will stop such writing before break. This process is providing feasibility of well-performed feature extraction.
 ### Baselines Standardize
 - Instead of common standardizing technique. A baseline data was computed from training data to extract feature better from class 'left' and 'right'. The baseline contains the normalized information of subject opening eyes without thinking any hands' movement in each experiment. The mean of large amount of samples within baseline label was computed to set as reference for left and right signal comparison. In order to standardize data, difference between samples and baseline information will be divided by baseline value as well. In another word, the data was represented as percentage drop or rise according to subject's electroencephalography baseline data.  
 ### Post Filter
