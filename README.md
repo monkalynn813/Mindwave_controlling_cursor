@@ -113,7 +113,7 @@ The project can be functional mainly rely on three individual packages. A brief 
 - `mind_control_cursor.launch`: This is the launch file for entire project. It takes two arguments `mode` and `plot`. Nodes `samplestream.py`, `mindwave_model.py`, and `cursorcontrol.py` will be executed if `mode` is set to be `fft`. Nodes `samplestream.py`, `modewave_record.py`, and `rqt_image_view` will be executed if `mode` is set to be `recored`. If argument `plot` is set to be True, node `plotfft` will be executed as well. 
 ## Demo Video and package run instruction 
 ### Demo video
-One can find demo video [here](https://youtu.be/PIS7Em5LzI4)
+One can find demo video [here](https://youtu.be/WFwUBeXI7JE)
 ### Project run instruction
 
  * > roslaunch cursor_control mind_control_cursor.launch mode:=fft
